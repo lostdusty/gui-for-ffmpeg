@@ -65,7 +65,6 @@ func (h ConvertorHandler) getSockPath(file convertor.File, progressbar *widget.P
 		buf := make([]byte, 16)
 		data := ""
 		progress := 0.0
-		progressMessage := ""
 		for {
 			_, err := fd.Read(buf)
 			if err != nil {
@@ -73,24 +72,19 @@ func (h ConvertorHandler) getSockPath(file convertor.File, progressbar *widget.P
 			}
 			data += string(buf)
 			a := re.FindAllStringSubmatch(data, -1)
-			cp := ""
 			if len(a) > 0 && len(a[len(a)-1]) > 0 {
-				c, _ := strconv.Atoi(a[len(a)-1][len(a[len(a)-1])-1])
+				c, err := strconv.Atoi(a[len(a)-1][len(a[len(a)-1])-1])
+				if err != nil {
+					return
+				}
 				progress = float64(c)
-				cp = fmt.Sprintf("%.2f", float64(c)/totalDuration*100)
 			}
 			if strings.Contains(data, "progress=end") {
-				cp = "done"
 				progress = totalDuration
 			}
-			if cp == "" {
-				cp = ".0"
-			}
-			if cp != progressMessage {
+			if progressbar.Value != progress {
 				progressbar.Value = progress
 				progressbar.Refresh()
-				progressMessage = cp
-				fmt.Println("progress: ", progressMessage)
 			}
 		}
 	}()
