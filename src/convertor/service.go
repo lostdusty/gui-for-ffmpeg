@@ -3,6 +3,7 @@ package convertor
 import (
 	"errors"
 	"os/exec"
+	"regexp"
 	"strconv"
 	"strings"
 )
@@ -46,23 +47,12 @@ func (s Service) RunConvert(setting ConvertSetting) error {
 	//args := "-report -n -i " + setting.VideoFileInput.Path + " -c:v libx264 -progress unix://" + setting.SocketPath + " output-file.mp4"
 	//args := "-n -i " + setting.VideoFileInput.Path + " -c:v libx264 -progress unix://" + setting.SocketPath + " output-file.mp4"
 	args := "-y -i " + setting.VideoFileInput.Path + " -c:v libx264 -progress unix://" + setting.SocketPath + " output-file.mp4"
-	cmd := exec.Command("ffmpeg", strings.Split(args, " ")...)
+	cmd := exec.Command(s.pathFFmpeg, strings.Split(args, " ")...)
 
-	//stderr, _ := cmd.StdoutPipe()
-	err := cmd.Start()
+	out, err := cmd.CombinedOutput()
 	if err != nil {
-		return err
-	}
-
-	//scanner := bufio.NewScanner(stderr)
-	////scanner.Split(bufio.ScanWords)
-	//for scanner.Scan() {
-	//	m := scanner.Text()
-	//	fmt.Println(m)
-	//}
-	err = cmd.Wait()
-	if err != nil {
-		return err
+		errStringArr := regexp.MustCompile("\r?\n").Split(strings.TrimSpace(string(out)), -1)
+		return errors.New(errStringArr[len(errStringArr)-1])
 	}
 
 	return nil
