@@ -46,8 +46,9 @@ func (s Service) RunConvert(setting ConvertSetting) error {
 	//args = append(args, "-progress", "unix://"+setting.SocketPath, "-i", setting.VideoFileInput.Path, "file-out.mp4")
 	//args := "-report -n -i " + setting.VideoFileInput.Path + " -c:v libx264 -progress unix://" + setting.SocketPath + " output-file.mp4"
 	//args := "-n -i " + setting.VideoFileInput.Path + " -c:v libx264 -progress unix://" + setting.SocketPath + " output-file.mp4"
-	args := "-y -i " + setting.VideoFileInput.Path + " -c:v libx264 -progress unix://" + setting.SocketPath + " output-file.mp4"
-	cmd := exec.Command(s.pathFFmpeg, strings.Split(args, " ")...)
+	//args := "-y -i " + setting.VideoFileInput.Path + " -c:v libx264 -progress unix://" + setting.SocketPath + " output-file.mp4"
+	args := []string{"-y", "-i", setting.VideoFileInput.Path, "-c:v", "libx264", "-progress", "unix://" + setting.SocketPath, "output-file.mp4"}
+	cmd := exec.Command(s.pathFFmpeg, args...)
 
 	out, err := cmd.CombinedOutput()
 	if err != nil {
