@@ -38,7 +38,7 @@ func (h ConvertorHandler) GetConvertor() {
 	h.convertorView.Main(h.runConvert, h.getSockPath)
 }
 
-func (h ConvertorHandler) getSockPath(file convertor.File, progressbar *widget.ProgressBar) (string, error) {
+func (h ConvertorHandler) getSockPath(file *convertor.File, progressbar *widget.ProgressBar) (string, error) {
 	totalDuration, err := h.getTotalDuration(file)
 
 	if err != nil {
@@ -101,6 +101,6 @@ func (h ConvertorHandler) runConvert(setting convertor.HandleConvertSetting) err
 	)
 }
 
-func (h ConvertorHandler) getTotalDuration(file convertor.File) (float64, error) {
+func (h ConvertorHandler) getTotalDuration(file *convertor.File) (float64, error) {
 	return h.convertorService.GetTotalDuration(file)
 }

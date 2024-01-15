@@ -1,6 +1,7 @@
 package convertor
 
 import (
+	"errors"
 	"os/exec"
 	"strconv"
 	"strings"
@@ -8,7 +9,7 @@ import (
 
 type ServiceContract interface {
 	RunConvert(setting ConvertSetting) error
-	GetTotalDuration(file File) (float64, error)
+	GetTotalDuration(file *File) (float64, error)
 }
 
 type Service struct {
@@ -23,7 +24,7 @@ type File struct {
 }
 
 type ConvertSetting struct {
-	VideoFileInput File
+	VideoFileInput *File
 	SocketPath     string
 }
 
@@ -67,12 +68,12 @@ func (s Service) RunConvert(setting ConvertSetting) error {
 	return nil
 }
 
-func (s Service) GetTotalDuration(file File) (duration float64, err error) {
-	args := "-v error -select_streams v:0 -count_packets -show_entries stream=nb_read_packets -of csv=p=0 " + file.Path
-	cmd := exec.Command(s.pathFFprobe, strings.Split(args, " ")...)
+func (s Service) GetTotalDuration(file *File) (duration float64, err error) {
+	args := []string{"-v", "error", "-select_streams", "v:0", "-count_packets", "-show_entries", "stream=nb_read_packets", "-of", "csv=p=0", file.Path}
+	cmd := exec.Command(s.pathFFprobe, args...)
 	out, err := cmd.CombinedOutput()
 	if err != nil {
-		return 0, err
+		return 0, errors.New(strings.TrimSpace(string(out)))
 	}
 	return strconv.ParseFloat(strings.TrimSpace(string(out)), 64)
 }

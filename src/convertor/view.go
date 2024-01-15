@@ -12,7 +12,7 @@ import (
 type ViewContract interface {
 	Main(
 		runConvert func(setting HandleConvertSetting) error,
-		getSocketPath func(File, *widget.ProgressBar) (string, error),
+		getSocketPath func(*File, *widget.ProgressBar) (string, error),
 	)
 }
 
@@ -21,8 +21,13 @@ type View struct {
 }
 
 type HandleConvertSetting struct {
-	VideoFileInput File
+	VideoFileInput *File
 	SocketPath     string
+}
+
+type enableFormConversionStruct struct {
+	fileVideoForConversion *widget.Button
+	form                   *widget.Form
 }
 
 func NewView(w fyne.Window) *View {
@@ -31,14 +36,9 @@ func NewView(w fyne.Window) *View {
 
 func (v View) Main(
 	runConvert func(setting HandleConvertSetting) error,
-	getSocketPath func(File, *widget.ProgressBar) (string, error),
+	getSocketPath func(*File, *widget.ProgressBar) (string, error),
 ) {
-	var fileInput File
-	var form *widget.Form
-
-	fileVideoForConversionMessage := canvas.NewText("", color.RGBA{255, 0, 0, 255})
-	fileVideoForConversionMessage.TextSize = 16
-	fileVideoForConversionMessage.TextStyle = fyne.TextStyle{Bold: true}
+	form := &widget.Form{}
 
 	conversionMessage := canvas.NewText("", color.RGBA{255, 0, 0, 255})
 	conversionMessage.TextSize = 16
@@ -47,7 +47,56 @@ func (v View) Main(
 	progress := widget.NewProgressBar()
 	progress.Hide()
 
-	fileVideoForConversion := widget.NewButton("выбрать", func() {
+	fileVideoForConversion, fileVideoForConversionMessage, fileInput := v.getButtonFileVideoForConversion(form, progress, conversionMessage)
+
+	form.Items = []*widget.FormItem{
+		{Text: "Файл для ковертации:", Widget: fileVideoForConversion},
+		{Widget: fileVideoForConversionMessage},
+	}
+	form.SubmitText = "Конвертировать"
+
+	enableFormConversionStruct := enableFormConversionStruct{
+		fileVideoForConversion: fileVideoForConversion,
+		form:                   form,
+	}
+
+	form.OnSubmit = func() {
+		fileVideoForConversion.Disable()
+		form.Disable()
+
+		socketPath, err := getSocketPath(fileInput, progress)
+
+		if err != nil {
+			showConversionMessage(conversionMessage, err)
+			enableFormConversion(enableFormConversionStruct)
+			return
+		}
+
+		setting := HandleConvertSetting{
+			VideoFileInput: fileInput,
+			SocketPath:     socketPath,
+		}
+		err = runConvert(setting)
+		if err != nil {
+			showConversionMessage(conversionMessage, err)
+			enableFormConversion(enableFormConversionStruct)
+			return
+		}
+		enableFormConversion(enableFormConversionStruct)
+	}
+
+	v.w.SetContent(widget.NewCard("Конвертор видео файлов", "", container.NewVBox(form, conversionMessage, progress)))
+	form.Disable()
+}
+
+func (v View) getButtonFileVideoForConversion(form *widget.Form, progress *widget.ProgressBar, conversionMessage *canvas.Text) (*widget.Button, *canvas.Text, *File) {
+	fileInput := &File{}
+
+	fileVideoForConversionMessage := canvas.NewText("", color.RGBA{255, 0, 0, 255})
+	fileVideoForConversionMessage.TextSize = 16
+	fileVideoForConversionMessage.TextStyle = fyne.TextStyle{Bold: true}
+
+	button := widget.NewButton("выбрать", func() {
 		fileDialog := dialog.NewFileOpen(
 			func(r fyne.URIReadCloser, err error) {
 				if err != nil {
@@ -55,59 +104,25 @@ func (v View) Main(
 					setStringErrorStyle(fileVideoForConversionMessage)
 					return
 				}
-
 				if r == nil {
 					return
 				}
 
-				fileInput = File{
-					Path: r.URI().Path(),
-					Name: r.URI().Name(),
-					Ext:  r.URI().Extension(),
-				}
+				fileInput.Path = r.URI().Path()
+				fileInput.Name = r.URI().Name()
+				fileInput.Ext = r.URI().Extension()
+
 				fileVideoForConversionMessage.Text = r.URI().Path()
 				setStringSuccessStyle(fileVideoForConversionMessage)
 
 				form.Enable()
+				progress.Hide()
+				conversionMessage.Text = ""
 			}, v.w)
 		fileDialog.Show()
 	})
 
-	form = &widget.Form{
-		Items: []*widget.FormItem{
-			{Text: "Файл для ковертации:", Widget: fileVideoForConversion},
-			{Widget: fileVideoForConversionMessage},
-		},
-		SubmitText: "Конвертировать",
-		OnSubmit: func() {
-			fileVideoForConversion.Disable()
-			form.Disable()
-
-			socketPath, err := getSocketPath(fileInput, progress)
-
-			if err != nil {
-				conversionMessage.Text = err.Error()
-				setStringErrorStyle(conversionMessage)
-				fileVideoForConversion.Enable()
-				form.Enable()
-			}
-
-			setting := HandleConvertSetting{
-				VideoFileInput: fileInput,
-				SocketPath:     socketPath,
-			}
-			err = runConvert(setting)
-			if err != nil {
-				conversionMessage.Text = err.Error()
-				setStringErrorStyle(conversionMessage)
-			}
-			fileVideoForConversion.Enable()
-			form.Enable()
-		},
-	}
-
-	v.w.SetContent(widget.NewCard("Конвертор видео файлов", "", container.NewVBox(form, conversionMessage, progress)))
-	form.Disable()
+	return button, fileVideoForConversionMessage, fileInput
 }
 
 func setStringErrorStyle(text *canvas.Text) {
@@ -118,4 +133,14 @@ func setStringErrorStyle(text *canvas.Text) {
 func setStringSuccessStyle(text *canvas.Text) {
 	text.Color = color.RGBA{49, 127, 114, 255}
 	text.Refresh()
+}
+
+func showConversionMessage(conversionMessage *canvas.Text, err error) {
+	conversionMessage.Text = err.Error()
+	setStringErrorStyle(conversionMessage)
+}
+
+func enableFormConversion(enableFormConversionStruct enableFormConversionStruct) {
+	enableFormConversionStruct.fileVideoForConversion.Enable()
+	enableFormConversionStruct.form.Enable()
 }
