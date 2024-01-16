@@ -53,7 +53,10 @@ func (s Service) RunConvert(setting ConvertSetting) error {
 	out, err := cmd.CombinedOutput()
 	if err != nil {
 		errStringArr := regexp.MustCompile("\r?\n").Split(strings.TrimSpace(string(out)), -1)
-		return errors.New(errStringArr[len(errStringArr)-1])
+		if len(errStringArr) > 1 {
+			return errors.New(errStringArr[len(errStringArr)-1])
+		}
+		return err
 	}
 
 	return nil
@@ -64,7 +67,11 @@ func (s Service) GetTotalDuration(file *File) (duration float64, err error) {
 	cmd := exec.Command(s.pathFFprobe, args...)
 	out, err := cmd.CombinedOutput()
 	if err != nil {
-		return 0, errors.New(strings.TrimSpace(string(out)))
+		errString := strings.TrimSpace(string(out))
+		if len(errString) > 1 {
+			return 0, errors.New(errString)
+		}
+		return 0, err
 	}
 	return strconv.ParseFloat(strings.TrimSpace(string(out)), 64)
 }
