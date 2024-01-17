@@ -1,8 +1,9 @@
 package handler
 
 import (
+	"errors"
 	"ffmpegGui/convertor"
-	myError "ffmpegGui/error"
+	"ffmpegGui/setting"
 	"fmt"
 	"fyne.io/fyne/v2/widget"
 	"log"
@@ -11,31 +12,39 @@ import (
 	"os"
 	"path"
 	"regexp"
+	"runtime"
 	"strconv"
 	"strings"
 	"time"
 )
 
 type ConvertorHandler struct {
-	convertorService convertor.ServiceContract
-	convertorView    convertor.ViewContract
-	errorView        myError.ViewContract
+	convertorService  convertor.ServiceContract
+	convertorView     convertor.ViewContract
+	settingView       setting.ViewContract
+	settingRepository setting.RepositoryContract
 }
 
 func NewConvertorHandler(
 	convertorService convertor.ServiceContract,
 	convertorView convertor.ViewContract,
-	errorView myError.ViewContract,
+	settingView setting.ViewContract,
+	settingRepository setting.RepositoryContract,
 ) *ConvertorHandler {
 	return &ConvertorHandler{
 		convertorService,
 		convertorView,
-		errorView,
+		settingView,
+		settingRepository,
 	}
 }
 
 func (h ConvertorHandler) GetConvertor() {
-	h.convertorView.Main(h.runConvert, h.getSockPath)
+	if h.checkingFFPathUtilities() == true {
+		h.convertorView.Main(h.runConvert, h.getSockPath)
+		return
+	}
+	h.settingView.SelectFFPath(h.saveSettingFFPath)
 }
 
 func (h ConvertorHandler) getSockPath(file *convertor.File, progressbar *widget.ProgressBar) (string, error) {
@@ -103,4 +112,69 @@ func (h ConvertorHandler) runConvert(setting convertor.HandleConvertSetting) err
 
 func (h ConvertorHandler) getTotalDuration(file *convertor.File) (float64, error) {
 	return h.convertorService.GetTotalDuration(file)
+}
+
+func (h ConvertorHandler) checkingFFPathUtilities() bool {
+	if h.checkingFFPath() == true {
+		return true
+	}
+
+	var pathsToFF []convertor.FFPathUtilities
+	if runtime.GOOS == "windows" {
+		pathsToFF = []convertor.FFPathUtilities{{"ffmpeg/bin/ffmpeg.exe", "ffmpeg/bin/ffprobe.exe"}}
+	} else {
+		pathsToFF = []convertor.FFPathUtilities{{"ffmpeg/bin/ffmpeg", "ffmpeg/bin/ffprobe"}, {"ffmpeg", "ffprobe"}}
+	}
+	for _, item := range pathsToFF {
+		ffmpegChecking, _ := h.convertorService.ChangeFFmpegPath(item.FFmpeg)
+		if ffmpegChecking == false {
+			continue
+		}
+		ffprobeChecking, _ := h.convertorService.ChangeFFprobePath(item.FFprobe)
+		if ffprobeChecking == false {
+			continue
+		}
+		ffmpegEntity := setting.Setting{Code: "ffmpeg", Value: item.FFmpeg}
+		h.settingRepository.Create(ffmpegEntity)
+		ffprobeEntity := setting.Setting{Code: "ffprobe", Value: item.FFprobe}
+		h.settingRepository.Create(ffprobeEntity)
+		return true
+	}
+
+	return false
+}
+
+func (h ConvertorHandler) saveSettingFFPath(ffmpegPath string, ffprobePath string) error {
+	ffmpegChecking, _ := h.convertorService.ChangeFFmpegPath(ffmpegPath)
+	if ffmpegChecking == false {
+		return errors.New("Это не FFmpeg")
+	}
+
+	ffprobeChecking, _ := h.convertorService.ChangeFFprobePath(ffprobePath)
+	if ffprobeChecking == false {
+		return errors.New("Это не FFprobe")
+	}
+
+	ffmpegEntity := setting.Setting{Code: "ffmpeg", Value: ffmpegPath}
+	h.settingRepository.Create(ffmpegEntity)
+	ffprobeEntity := setting.Setting{Code: "ffprobe", Value: ffprobePath}
+	h.settingRepository.Create(ffprobeEntity)
+
+	h.GetConvertor()
+
+	return nil
+}
+
+func (h ConvertorHandler) checkingFFPath() bool {
+	_, err := h.convertorService.GetFFmpegVesrion()
+	if err != nil {
+		return false
+	}
+
+	_, err = h.convertorService.GetFFprobeVersion()
+	if err != nil {
+		return false
+	}
+
+	return true
 }
