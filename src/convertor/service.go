@@ -33,8 +33,10 @@ type File struct {
 }
 
 type ConvertSetting struct {
-	VideoFileInput *File
-	SocketPath     string
+	VideoFileInput       *File
+	VideoFileOut         *File
+	SocketPath           string
+	OverwriteOutputFiles bool
 }
 
 type ConvertData struct {
@@ -48,13 +50,11 @@ func NewService(ffPathUtilities FFPathUtilities) *Service {
 }
 
 func (s Service) RunConvert(setting ConvertSetting) error {
-	//args := strings.Split("-report -n -c:v libx264", " ")
-	//args := strings.Split("-n -c:v libx264", " ")
-	//args = append(args, "-progress", "unix://"+setting.SocketPath, "-i", setting.VideoFileInput.Path, "file-out.mp4")
-	//args := "-report -n -i " + setting.VideoFileInput.Path + " -c:v libx264 -progress unix://" + setting.SocketPath + " output-file.mp4"
-	//args := "-n -i " + setting.VideoFileInput.Path + " -c:v libx264 -progress unix://" + setting.SocketPath + " output-file.mp4"
-	//args := "-y -i " + setting.VideoFileInput.Path + " -c:v libx264 -progress unix://" + setting.SocketPath + " output-file.mp4"
-	args := []string{"-y", "-i", setting.VideoFileInput.Path, "-c:v", "libx264", "-progress", "unix://" + setting.SocketPath, "output-file.mp4"}
+	overwriteOutputFiles := "-n"
+	if setting.OverwriteOutputFiles == true {
+		overwriteOutputFiles = "-y"
+	}
+	args := []string{overwriteOutputFiles, "-i", setting.VideoFileInput.Path, "-c:v", "libx264", "-progress", "unix://" + setting.SocketPath, setting.VideoFileOut.Path}
 	cmd := exec.Command(s.ffPathUtilities.FFmpeg, args...)
 
 	out, err := cmd.CombinedOutput()

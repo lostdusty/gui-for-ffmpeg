@@ -15,17 +15,17 @@ import (
 	"os"
 )
 
-const appVersion string = "0.1.0"
+//const appVersion string = "0.1.0"
 
 func main() {
 	a := app.New()
 	w := a.NewWindow("GUI FFMpeg!")
-	w.Resize(fyne.Size{800, 600})
+	w.Resize(fyne.Size{Width: 800, Height: 600})
 
 	errorView := myError.NewView(w)
 
 	if canCreateFile("data/database") != true {
-		errorView.PanicError(errors.New("Не смогли создать файл 'database' в папке 'data'"))
+		errorView.PanicError(errors.New("не смогли создать файл 'database' в папке 'data'"))
 		w.ShowAndRun()
 		return
 	}
