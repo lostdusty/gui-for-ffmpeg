@@ -78,12 +78,12 @@ func (s Service) RunConvert(setting ConvertSetting, progress ProgressContract) e
 		return err
 	}
 
-	err = progress.Run(stdOut, stdErr)
-	if err != nil {
-		return err
-	}
+	errProgress := progress.Run(stdOut, stdErr)
 
 	err = cmd.Wait()
+	if errProgress != nil {
+		return errProgress
+	}
 	if err != nil {
 		return err
 	}
