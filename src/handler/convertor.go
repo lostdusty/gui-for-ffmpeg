@@ -1,22 +1,17 @@
 package handler
 
 import (
+	"bufio"
 	"errors"
 	"ffmpegGui/convertor"
 	"ffmpegGui/helper"
 	"ffmpegGui/setting"
-	"fmt"
 	"fyne.io/fyne/v2/widget"
-	"log"
-	"math/rand"
-	"net"
-	"os"
-	"path"
+	"io"
 	"regexp"
 	"runtime"
 	"strconv"
 	"strings"
-	"time"
 )
 
 type ConvertorHandler struct {
@@ -42,67 +37,18 @@ func NewConvertorHandler(
 
 func (h ConvertorHandler) GetConvertor() {
 	if h.checkingFFPathUtilities() == true {
-		h.convertorView.Main(h.runConvert, h.getSockPath)
+		h.convertorView.Main(h.runConvert)
 		return
 	}
 	h.settingView.SelectFFPath(h.saveSettingFFPath)
 }
 
-func (h ConvertorHandler) getSockPath(file *convertor.File, progressbar *widget.ProgressBar) (string, error) {
-	totalDuration, err := h.convertorService.GetTotalDuration(file)
-
+func (h ConvertorHandler) runConvert(setting convertor.HandleConvertSetting, progressbar *widget.ProgressBar) error {
+	totalDuration, err := h.convertorService.GetTotalDuration(setting.VideoFileInput)
 	if err != nil {
-		return "", err
+		return err
 	}
-	progressbar.Value = 0
-	progressbar.Max = totalDuration
-	progressbar.Show()
-	progressbar.Refresh()
-
-	rand.Seed(time.Now().Unix())
-	sockFileName := path.Join(os.TempDir(), fmt.Sprintf("%d_sock", rand.Int()))
-	l, err := net.Listen("unix", sockFileName)
-	if err != nil {
-		return "", err
-	}
-
-	go func() {
-		re := regexp.MustCompile(`frame=(\d+)`)
-		fd, err := l.Accept()
-		if err != nil {
-			log.Fatal("accept error:", err)
-		}
-		buf := make([]byte, 16)
-		data := ""
-		progress := 0.0
-		for {
-			_, err := fd.Read(buf)
-			if err != nil {
-				return
-			}
-			data += string(buf)
-			a := re.FindAllStringSubmatch(data, -1)
-			if len(a) > 0 && len(a[len(a)-1]) > 0 {
-				c, err := strconv.Atoi(a[len(a)-1][len(a[len(a)-1])-1])
-				if err != nil {
-					return
-				}
-				progress = float64(c)
-			}
-			if strings.Contains(data, "progress=end") {
-				progress = totalDuration
-			}
-			if progressbar.Value != progress {
-				progressbar.Value = progress
-				progressbar.Refresh()
-			}
-		}
-	}()
-
-	return sockFileName, nil
-}
-
-func (h ConvertorHandler) runConvert(setting convertor.HandleConvertSetting) error {
+	progress := NewProgress(totalDuration, progressbar)
 
 	return h.convertorService.RunConvert(
 		convertor.ConvertSetting{
@@ -112,9 +58,9 @@ func (h ConvertorHandler) runConvert(setting convertor.HandleConvertSetting) err
 				Name: setting.VideoFileInput.Name,
 				Ext:  ".mp4",
 			},
-			SocketPath:           setting.SocketPath,
 			OverwriteOutputFiles: setting.OverwriteOutputFiles,
 		},
+		progress,
 	)
 }
 
@@ -181,4 +127,80 @@ func (h ConvertorHandler) checkingFFPath() bool {
 	}
 
 	return true
+}
+
+type progress struct {
+	totalDuration float64
+	progressbar   *widget.ProgressBar
+	protocol      string
+}
+
+func NewProgress(totalDuration float64, progressbar *widget.ProgressBar) progress {
+	return progress{
+		totalDuration: totalDuration,
+		progressbar:   progressbar,
+		protocol:      "pipe:",
+	}
+}
+
+func (p progress) GetProtocole() string {
+	return p.protocol
+}
+
+func (p progress) Run(stdOut io.ReadCloser, stdErr io.ReadCloser) error {
+	isProcessCompleted := false
+	var errorText string
+
+	p.progressbar.Value = 0
+	p.progressbar.Max = p.totalDuration
+	p.progressbar.Show()
+	p.progressbar.Refresh()
+
+	progress := 0.0
+
+	go func() {
+		scannerErr := bufio.NewScanner(stdErr)
+		for scannerErr.Scan() {
+			errorText = scannerErr.Text()
+		}
+		if err := scannerErr.Err(); err != nil {
+			errorText = err.Error()
+		}
+	}()
+
+	scannerOut := bufio.NewScanner(stdOut)
+	for scannerOut.Scan() {
+		if isProcessCompleted != true {
+			isProcessCompleted = true
+		}
+		data := scannerOut.Text()
+		re := regexp.MustCompile(`frame=(\d+)`)
+		a := re.FindAllStringSubmatch(data, -1)
+
+		if len(a) > 0 && len(a[len(a)-1]) > 0 {
+			c, err := strconv.Atoi(a[len(a)-1][len(a[len(a)-1])-1])
+			if err != nil {
+				continue
+			}
+			progress = float64(c)
+		}
+		if strings.Contains(data, "progress=end") {
+			p.progressbar.Value = p.totalDuration
+			p.progressbar.Refresh()
+			isProcessCompleted = true
+		}
+		if p.progressbar.Value != progress {
+			p.progressbar.Value = progress
+			p.progressbar.Refresh()
+		}
+	}
+
+	if isProcessCompleted == false {
+		if len(errorText) == 0 {
+			errorText = "не смогли отконвертировать видео"
+		}
+		return errors.New(errorText)
+	}
+
+	return nil
 }

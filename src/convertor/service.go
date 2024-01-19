@@ -2,6 +2,8 @@ package convertor
 
 import (
 	"errors"
+	"ffmpegGui/helper"
+	"io"
 	"os/exec"
 	"regexp"
 	"strconv"
@@ -9,12 +11,17 @@ import (
 )
 
 type ServiceContract interface {
-	RunConvert(setting ConvertSetting) error
+	RunConvert(setting ConvertSetting, progress ProgressContract) error
 	GetTotalDuration(file *File) (float64, error)
 	GetFFmpegVesrion() (string, error)
 	GetFFprobeVersion() (string, error)
 	ChangeFFmpegPath(path string) (bool, error)
 	ChangeFFprobePath(path string) (bool, error)
+}
+
+type ProgressContract interface {
+	GetProtocole() string
+	Run(stdOut io.ReadCloser, stdErr io.ReadCloser) error
 }
 
 type FFPathUtilities struct {
@@ -35,7 +42,6 @@ type File struct {
 type ConvertSetting struct {
 	VideoFileInput       *File
 	VideoFileOut         *File
-	SocketPath           string
 	OverwriteOutputFiles bool
 }
 
@@ -49,20 +55,36 @@ func NewService(ffPathUtilities FFPathUtilities) *Service {
 	}
 }
 
-func (s Service) RunConvert(setting ConvertSetting) error {
+func (s Service) RunConvert(setting ConvertSetting, progress ProgressContract) error {
 	overwriteOutputFiles := "-n"
 	if setting.OverwriteOutputFiles == true {
 		overwriteOutputFiles = "-y"
 	}
-	args := []string{overwriteOutputFiles, "-i", setting.VideoFileInput.Path, "-c:v", "libx264", "-progress", "unix://" + setting.SocketPath, setting.VideoFileOut.Path}
+	args := []string{overwriteOutputFiles, "-i", setting.VideoFileInput.Path, "-c:v", "libx264", "-progress", progress.GetProtocole(), setting.VideoFileOut.Path}
 	cmd := exec.Command(s.ffPathUtilities.FFmpeg, args...)
+	helper.PrepareBackgroundCommand(cmd)
 
-	out, err := cmd.CombinedOutput()
+	stdOut, err := cmd.StdoutPipe()
 	if err != nil {
-		errStringArr := regexp.MustCompile("\r?\n").Split(strings.TrimSpace(string(out)), -1)
-		if len(errStringArr) > 1 {
-			return errors.New(errStringArr[len(errStringArr)-1])
-		}
+		return err
+	}
+	stdErr, err := cmd.StderrPipe()
+	if err != nil {
+		return err
+	}
+
+	err = cmd.Start()
+	if err != nil {
+		return err
+	}
+
+	err = progress.Run(stdOut, stdErr)
+	if err != nil {
+		return err
+	}
+
+	err = cmd.Wait()
+	if err != nil {
 		return err
 	}
 
@@ -72,6 +94,7 @@ func (s Service) RunConvert(setting ConvertSetting) error {
 func (s Service) GetTotalDuration(file *File) (duration float64, err error) {
 	args := []string{"-v", "error", "-select_streams", "v:0", "-count_packets", "-show_entries", "stream=nb_read_packets", "-of", "csv=p=0", file.Path}
 	cmd := exec.Command(s.ffPathUtilities.FFprobe, args...)
+	helper.PrepareBackgroundCommand(cmd)
 	out, err := cmd.CombinedOutput()
 	if err != nil {
 		errString := strings.TrimSpace(string(out))
@@ -85,6 +108,7 @@ func (s Service) GetTotalDuration(file *File) (duration float64, err error) {
 
 func (s Service) GetFFmpegVesrion() (string, error) {
 	cmd := exec.Command(s.ffPathUtilities.FFmpeg, "-version")
+	helper.PrepareBackgroundCommand(cmd)
 	out, err := cmd.CombinedOutput()
 	if err != nil {
 		return "", err
@@ -95,6 +119,7 @@ func (s Service) GetFFmpegVesrion() (string, error) {
 
 func (s Service) GetFFprobeVersion() (string, error) {
 	cmd := exec.Command(s.ffPathUtilities.FFprobe, "-version")
+	helper.PrepareBackgroundCommand(cmd)
 	out, err := cmd.CombinedOutput()
 	if err != nil {
 		return "", err
@@ -105,6 +130,7 @@ func (s Service) GetFFprobeVersion() (string, error) {
 
 func (s Service) ChangeFFmpegPath(path string) (bool, error) {
 	cmd := exec.Command(path, "-version")
+	helper.PrepareBackgroundCommand(cmd)
 	out, err := cmd.CombinedOutput()
 	if err != nil {
 		return false, err
@@ -118,6 +144,7 @@ func (s Service) ChangeFFmpegPath(path string) (bool, error) {
 
 func (s Service) ChangeFFprobePath(path string) (bool, error) {
 	cmd := exec.Command(path, "-version")
+	helper.PrepareBackgroundCommand(cmd)
 	out, err := cmd.CombinedOutput()
 	if err != nil {
 		return false, err

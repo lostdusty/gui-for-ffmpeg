@@ -12,8 +12,7 @@ import (
 
 type ViewContract interface {
 	Main(
-		runConvert func(setting HandleConvertSetting) error,
-		getSocketPath func(*File, *widget.ProgressBar) (string, error),
+		runConvert func(setting HandleConvertSetting, progressbar *widget.ProgressBar) error,
 	)
 }
 
@@ -24,7 +23,6 @@ type View struct {
 type HandleConvertSetting struct {
 	VideoFileInput       *File
 	DirectoryForSave     string
-	SocketPath           string
 	OverwriteOutputFiles bool
 }
 
@@ -39,8 +37,7 @@ func NewView(w fyne.Window) *View {
 }
 
 func (v View) Main(
-	runConvert func(setting HandleConvertSetting) error,
-	getSocketPath func(*File, *widget.ProgressBar) (string, error),
+	runConvert func(setting HandleConvertSetting, progressbar *widget.ProgressBar) error,
 ) {
 	form := &widget.Form{}
 
@@ -61,7 +58,7 @@ func (v View) Main(
 	form.Items = []*widget.FormItem{
 		{Text: "Файл для ковертации:", Widget: fileVideoForConversion},
 		{Widget: fileVideoForConversionMessage},
-		{Text: "Папка куда будет сохранятся:", Widget: buttonForSelectedDir},
+		{Text: "Папка куда будет сохраняться:", Widget: buttonForSelectedDir},
 		{Widget: buttonForSelectedDirMessage},
 		{Widget: checkboxOverwriteOutputFiles},
 	}
@@ -85,21 +82,12 @@ func (v View) Main(
 		buttonForSelectedDir.Disable()
 		form.Disable()
 
-		socketPath, err := getSocketPath(fileInput, progress)
-
-		if err != nil {
-			showConversionMessage(conversionMessage, err)
-			enableFormConversion(enableFormConversionStruct)
-			return
-		}
-
 		setting := HandleConvertSetting{
 			VideoFileInput:       fileInput,
 			DirectoryForSave:     *pathToSaveDirectory,
-			SocketPath:           socketPath,
 			OverwriteOutputFiles: isOverwriteOutputFiles,
 		}
-		err = runConvert(setting)
+		err := runConvert(setting, progress)
 		if err != nil {
 			showConversionMessage(conversionMessage, err)
 			enableFormConversion(enableFormConversionStruct)
@@ -108,8 +96,9 @@ func (v View) Main(
 		enableFormConversion(enableFormConversionStruct)
 	}
 
-	v.w.SetContent(widget.NewCard("Конвертор видео файлов", "", container.NewVBox(form, conversionMessage, progress)))
+	v.w.SetContent(widget.NewCard("Конвертор видео файлов в mp4", "", container.NewVBox(form, conversionMessage, progress)))
 	form.Disable()
+	progress.Hide()
 }
 
 func (v View) getButtonFileVideoForConversion(form *widget.Form, progress *widget.ProgressBar, conversionMessage *canvas.Text) (*widget.Button, *canvas.Text, *File) {

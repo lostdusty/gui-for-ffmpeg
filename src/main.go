@@ -15,12 +15,13 @@ import (
 	"os"
 )
 
-//const appVersion string = "0.1.0"
+//const appVersion string = "0.1.1"
 
 func main() {
 	a := app.New()
 	w := a.NewWindow("GUI FFMpeg!")
 	w.Resize(fyne.Size{Width: 800, Height: 600})
+	w.CenterOnScreen()
 
 	errorView := myError.NewView(w)
 
