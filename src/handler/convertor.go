@@ -153,7 +153,6 @@ func (p progress) Run(stdOut io.ReadCloser, stdErr io.ReadCloser) error {
 
 	p.progressbar.Value = 0
 	p.progressbar.Max = p.totalDuration
-	p.progressbar.Show()
 	p.progressbar.Refresh()
 
 	progress := 0.0

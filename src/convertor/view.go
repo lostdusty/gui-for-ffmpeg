@@ -127,7 +127,8 @@ func (v View) getButtonFileVideoForConversion(form *widget.Form, progress *widge
 				setStringSuccessStyle(fileVideoForConversionMessage)
 
 				form.Enable()
-				progress.Hide()
+				progress.Value = 0
+				progress.Refresh()
 				conversionMessage.Text = ""
 			}, v.w)
 		fileDialog.Show()
