@@ -98,7 +98,6 @@ func (v View) Main(
 
 	v.w.SetContent(widget.NewCard("Конвертор видео файлов в mp4", "", container.NewVBox(form, conversionMessage, progress)))
 	form.Disable()
-	progress.Hide()
 }
 
 func (v View) getButtonFileVideoForConversion(form *widget.Form, progress *widget.ProgressBar, conversionMessage *canvas.Text) (*widget.Button, *canvas.Text, *File) {
