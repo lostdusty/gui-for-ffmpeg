@@ -17,6 +17,7 @@ type ServiceContract interface {
 	GetFFprobeVersion() (string, error)
 	ChangeFFmpegPath(path string) (bool, error)
 	ChangeFFprobePath(path string) (bool, error)
+	GetRunningProcesses() map[int]*exec.Cmd
 }
 
 type ProgressContract interface {
@@ -29,8 +30,14 @@ type FFPathUtilities struct {
 	FFprobe string
 }
 
+type runningProcesses struct {
+	items          map[int]*exec.Cmd
+	numberOfStarts int
+}
+
 type Service struct {
-	ffPathUtilities *FFPathUtilities
+	ffPathUtilities  *FFPathUtilities
+	runningProcesses runningProcesses
 }
 
 type File struct {
@@ -51,7 +58,8 @@ type ConvertData struct {
 
 func NewService(ffPathUtilities FFPathUtilities) *Service {
 	return &Service{
-		ffPathUtilities: &ffPathUtilities,
+		ffPathUtilities:  &ffPathUtilities,
+		runningProcesses: runningProcesses{items: map[int]*exec.Cmd{}, numberOfStarts: 0},
 	}
 }
 
@@ -77,10 +85,14 @@ func (s Service) RunConvert(setting ConvertSetting, progress ProgressContract) e
 	if err != nil {
 		return err
 	}
+	index := s.runningProcesses.numberOfStarts
+	s.runningProcesses.numberOfStarts++
+	s.runningProcesses.items[index] = cmd
 
 	errProgress := progress.Run(stdOut, stdErr)
 
 	err = cmd.Wait()
+	delete(s.runningProcesses.items, index)
 	if errProgress != nil {
 		return errProgress
 	}
@@ -154,4 +166,8 @@ func (s Service) ChangeFFprobePath(path string) (bool, error) {
 	}
 	s.ffPathUtilities.FFprobe = path
 	return true, nil
+}
+
+func (s Service) GetRunningProcesses() map[int]*exec.Cmd {
+	return s.runningProcesses.items
 }

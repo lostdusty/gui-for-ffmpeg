@@ -38,7 +38,7 @@ func main() {
 		return
 	}
 
-	defer appClose(db)
+	defer appCloseWithDb(db)
 
 	err = migration.Run(db)
 	if err != nil {
@@ -66,6 +66,7 @@ func main() {
 	convertorView := convertor.NewView(w)
 	settingView := setting.NewView(w)
 	convertorService := convertor.NewService(ffPathUtilities)
+	defer appCloseWithConvert(convertorService)
 	mainHandler := handler.NewConvertorHandler(convertorService, convertorView, settingView, settingRepository)
 
 	mainHandler.GetConvertor()
@@ -73,10 +74,16 @@ func main() {
 	w.ShowAndRun()
 }
 
-func appClose(db *gorm.DB) {
+func appCloseWithDb(db *gorm.DB) {
 	sqlDB, err := db.DB()
 	if err == nil {
 		_ = sqlDB.Close()
+	}
+}
+
+func appCloseWithConvert(convertorService convertor.ServiceContract) {
+	for _, cmd := range convertorService.GetRunningProcesses() {
+		_ = cmd.Process.Kill()
 	}
 }
 
