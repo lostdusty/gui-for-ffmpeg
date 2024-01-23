@@ -9,7 +9,6 @@ import (
 	"fyne.io/fyne/v2/widget"
 	"io"
 	"regexp"
-	"runtime"
 	"strconv"
 	"strings"
 )
@@ -69,12 +68,7 @@ func (h ConvertorHandler) checkingFFPathUtilities() bool {
 		return true
 	}
 
-	var pathsToFF []convertor.FFPathUtilities
-	if runtime.GOOS == "windows" {
-		pathsToFF = []convertor.FFPathUtilities{{"ffmpeg\\bin\\ffmpeg.exe", "ffmpeg\\bin\\ffprobe.exe"}}
-	} else {
-		pathsToFF = []convertor.FFPathUtilities{{"ffmpeg/bin/ffmpeg", "ffmpeg/bin/ffprobe"}, {"ffmpeg", "ffprobe"}}
-	}
+	pathsToFF := getPathsToFF()
 	for _, item := range pathsToFF {
 		ffmpegChecking, _ := h.convertorService.ChangeFFmpegPath(item.FFmpeg)
 		if ffmpegChecking == false {

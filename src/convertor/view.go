@@ -2,6 +2,7 @@ package convertor
 
 import (
 	"errors"
+	"ffmpegGui/helper"
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
@@ -131,6 +132,7 @@ func (v View) getButtonFileVideoForConversion(form *widget.Form, progress *widge
 				progress.Refresh()
 				conversionMessage.Text = ""
 			}, v.w)
+		helper.FileDialogResize(fileDialog, v.w)
 		fileDialog.Show()
 	})
 
@@ -162,6 +164,7 @@ func (v View) getButtonForSelectingDirectoryForSaving() (button *widget.Button, 
 				buttonMessage.Text = r.Path()
 				setStringSuccessStyle(buttonMessage)
 			}, v.w)
+		helper.FileDialogResize(fileDialog, v.w)
 		fileDialog.Show()
 	})
 

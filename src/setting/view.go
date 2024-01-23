@@ -1,6 +1,7 @@
 package setting
 
 import (
+	"ffmpegGui/helper"
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
@@ -81,6 +82,7 @@ func (v View) getButtonSelectFile() (filePath *string, button *widget.Button, bu
 				buttonMessage.Text = r.URI().Path()
 				setStringSuccessStyle(buttonMessage)
 			}, v.w)
+		helper.FileDialogResize(fileDialog, v.w)
 		fileDialog.Show()
 	})
 
