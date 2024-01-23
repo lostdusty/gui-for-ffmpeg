@@ -19,6 +19,10 @@ import (
 
 func main() {
 	a := app.New()
+	iconResource, err := fyne.LoadResourceFromPath("icon.png")
+	if err == nil {
+		a.SetIcon(iconResource)
+	}
 	w := a.NewWindow("GUI FFMpeg!")
 	w.Resize(fyne.Size{Width: 800, Height: 600})
 	w.CenterOnScreen()
