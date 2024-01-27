@@ -163,9 +163,6 @@ func (p progress) Run(stdOut io.ReadCloser, stdErr io.ReadCloser) error {
 
 	scannerOut := bufio.NewScanner(stdOut)
 	for scannerOut.Scan() {
-		if isProcessCompleted != true {
-			isProcessCompleted = true
-		}
 		data := scannerOut.Text()
 		re := regexp.MustCompile(`frame=(\d+)`)
 		a := re.FindAllStringSubmatch(data, -1)
@@ -181,6 +178,7 @@ func (p progress) Run(stdOut io.ReadCloser, stdErr io.ReadCloser) error {
 			p.progressbar.Value = p.totalDuration
 			p.progressbar.Refresh()
 			isProcessCompleted = true
+			break
 		}
 		if p.progressbar.Value != progress {
 			p.progressbar.Value = progress
