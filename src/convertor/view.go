@@ -3,11 +3,13 @@ package convertor
 import (
 	"errors"
 	"ffmpegGui/helper"
+	"ffmpegGui/localizer"
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/widget"
+	"github.com/nicksnyder/go-i18n/v2/i18n"
 	"image/color"
 )
 
@@ -18,7 +20,8 @@ type ViewContract interface {
 }
 
 type View struct {
-	w fyne.Window
+	w                fyne.Window
+	localizerService localizer.ServiceContract
 }
 
 type HandleConvertSetting struct {
@@ -33,8 +36,11 @@ type enableFormConversionStruct struct {
 	form                   *widget.Form
 }
 
-func NewView(w fyne.Window) *View {
-	return &View{w}
+func NewView(w fyne.Window, localizerService localizer.ServiceContract) *View {
+	return &View{
+		w:                w,
+		localizerService: localizerService,
+	}
 }
 
 func (v View) Main(
@@ -52,18 +58,35 @@ func (v View) Main(
 	buttonForSelectedDir, buttonForSelectedDirMessage, pathToSaveDirectory := v.getButtonForSelectingDirectoryForSaving()
 
 	isOverwriteOutputFiles := false
-	checkboxOverwriteOutputFiles := widget.NewCheck("Разрешить перезаписать файл", func(b bool) {
+	checkboxOverwriteOutputFilesTitle := v.localizerService.GetMessage(&i18n.LocalizeConfig{
+		MessageID: "checkboxOverwriteOutputFilesTitle",
+	})
+	checkboxOverwriteOutputFiles := widget.NewCheck(checkboxOverwriteOutputFilesTitle, func(b bool) {
 		isOverwriteOutputFiles = b
 	})
 
 	form.Items = []*widget.FormItem{
-		{Text: "Файл для ковертации:", Widget: fileVideoForConversion},
-		{Widget: fileVideoForConversionMessage},
-		{Text: "Папка куда будет сохраняться:", Widget: buttonForSelectedDir},
-		{Widget: buttonForSelectedDirMessage},
-		{Widget: checkboxOverwriteOutputFiles},
+		{
+			Text:   v.localizerService.GetMessage(&i18n.LocalizeConfig{MessageID: "fileVideoForConversionTitle"}),
+			Widget: fileVideoForConversion,
+		},
+		{
+			Widget: fileVideoForConversionMessage,
+		},
+		{
+			Text:   v.localizerService.GetMessage(&i18n.LocalizeConfig{MessageID: "buttonForSelectedDirTitle"}),
+			Widget: buttonForSelectedDir,
+		},
+		{
+			Widget: buttonForSelectedDirMessage,
+		},
+		{
+			Widget: checkboxOverwriteOutputFiles,
+		},
 	}
-	form.SubmitText = "Конвертировать"
+	form.SubmitText = v.localizerService.GetMessage(&i18n.LocalizeConfig{
+		MessageID: "converterVideoFilesSubmitTitle",
+	})
 
 	enableFormConversionStruct := enableFormConversionStruct{
 		fileVideoForConversion: fileVideoForConversion,
@@ -73,7 +96,9 @@ func (v View) Main(
 
 	form.OnSubmit = func() {
 		if len(*pathToSaveDirectory) == 0 {
-			showConversionMessage(conversionMessage, errors.New("Не выбрали папку для сохранения!"))
+			showConversionMessage(conversionMessage, errors.New(v.localizerService.GetMessage(&i18n.LocalizeConfig{
+				MessageID: "errorSelectedFolderSave",
+			})))
 			enableFormConversion(enableFormConversionStruct)
 			return
 		}
@@ -97,7 +122,10 @@ func (v View) Main(
 		enableFormConversion(enableFormConversionStruct)
 	}
 
-	v.w.SetContent(widget.NewCard("Конвертор видео файлов в mp4", "", container.NewVBox(form, conversionMessage, progress)))
+	converterVideoFilesTitle := v.localizerService.GetMessage(&i18n.LocalizeConfig{
+		MessageID: "converterVideoFilesTitle",
+	})
+	v.w.SetContent(widget.NewCard(converterVideoFilesTitle, "", container.NewVBox(form, conversionMessage, progress)))
 	form.Disable()
 }
 
@@ -108,7 +136,11 @@ func (v View) getButtonFileVideoForConversion(form *widget.Form, progress *widge
 	fileVideoForConversionMessage.TextSize = 16
 	fileVideoForConversionMessage.TextStyle = fyne.TextStyle{Bold: true}
 
-	button := widget.NewButton("выбрать", func() {
+	buttonTitle := v.localizerService.GetMessage(&i18n.LocalizeConfig{
+		MessageID: "choose",
+	})
+
+	button := widget.NewButton(buttonTitle, func() {
 		fileDialog := dialog.NewFileOpen(
 			func(r fyne.URIReadCloser, err error) {
 				if err != nil {
@@ -147,7 +179,11 @@ func (v View) getButtonForSelectingDirectoryForSaving() (button *widget.Button, 
 	path := ""
 	dirPath = &path
 
-	button = widget.NewButton("выбрать", func() {
+	buttonTitle := v.localizerService.GetMessage(&i18n.LocalizeConfig{
+		MessageID: "choose",
+	})
+
+	button = widget.NewButton(buttonTitle, func() {
 		fileDialog := dialog.NewFolderOpen(
 			func(r fyne.ListableURI, err error) {
 				if err != nil {

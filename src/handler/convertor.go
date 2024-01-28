@@ -5,8 +5,10 @@ import (
 	"errors"
 	"ffmpegGui/convertor"
 	"ffmpegGui/helper"
+	"ffmpegGui/localizer"
 	"ffmpegGui/setting"
 	"fyne.io/fyne/v2/widget"
+	"github.com/nicksnyder/go-i18n/v2/i18n"
 	"io"
 	"regexp"
 	"strconv"
@@ -17,21 +19,33 @@ type ConvertorHandler struct {
 	convertorService  convertor.ServiceContract
 	convertorView     convertor.ViewContract
 	settingView       setting.ViewContract
+	localizerView     localizer.ViewContract
 	settingRepository setting.RepositoryContract
+	localizerService  localizer.ServiceContract
 }
 
 func NewConvertorHandler(
 	convertorService convertor.ServiceContract,
 	convertorView convertor.ViewContract,
 	settingView setting.ViewContract,
+	localizerView localizer.ViewContract,
 	settingRepository setting.RepositoryContract,
+	localizerService localizer.ServiceContract,
 ) *ConvertorHandler {
 	return &ConvertorHandler{
-		convertorService,
-		convertorView,
-		settingView,
-		settingRepository,
+		convertorService:  convertorService,
+		convertorView:     convertorView,
+		settingView:       settingView,
+		localizerView:     localizerView,
+		settingRepository: settingRepository,
+		localizerService:  localizerService,
 	}
+}
+
+func (h ConvertorHandler) LanguageSelection() {
+	h.localizerView.LanguageSelection(func(lang localizer.Lang) {
+		h.GetConvertor()
+	})
 }
 
 func (h ConvertorHandler) GetConvertor() {
@@ -47,7 +61,7 @@ func (h ConvertorHandler) runConvert(setting convertor.HandleConvertSetting, pro
 	if err != nil {
 		return err
 	}
-	progress := NewProgress(totalDuration, progressbar)
+	progress := NewProgress(totalDuration, progressbar, h.localizerService)
 
 	return h.convertorService.RunConvert(
 		convertor.ConvertSetting{
@@ -91,12 +105,18 @@ func (h ConvertorHandler) checkingFFPathUtilities() bool {
 func (h ConvertorHandler) saveSettingFFPath(ffmpegPath string, ffprobePath string) error {
 	ffmpegChecking, _ := h.convertorService.ChangeFFmpegPath(ffmpegPath)
 	if ffmpegChecking == false {
-		return errors.New("это не FFmpeg")
+		errorText := h.localizerService.GetMessage(&i18n.LocalizeConfig{
+			MessageID: "errorFFmpeg",
+		})
+		return errors.New(errorText)
 	}
 
 	ffprobeChecking, _ := h.convertorService.ChangeFFprobePath(ffprobePath)
 	if ffprobeChecking == false {
-		return errors.New("это не FFprobe")
+		errorText := h.localizerService.GetMessage(&i18n.LocalizeConfig{
+			MessageID: "errorFFprobe",
+		})
+		return errors.New(errorText)
 	}
 
 	ffmpegEntity := setting.Setting{Code: "ffmpeg", Value: ffmpegPath}
@@ -124,16 +144,18 @@ func (h ConvertorHandler) checkingFFPath() bool {
 }
 
 type progress struct {
-	totalDuration float64
-	progressbar   *widget.ProgressBar
-	protocol      string
+	totalDuration    float64
+	progressbar      *widget.ProgressBar
+	protocol         string
+	localizerService localizer.ServiceContract
 }
 
-func NewProgress(totalDuration float64, progressbar *widget.ProgressBar) progress {
+func NewProgress(totalDuration float64, progressbar *widget.ProgressBar, localizerService localizer.ServiceContract) progress {
 	return progress{
-		totalDuration: totalDuration,
-		progressbar:   progressbar,
-		protocol:      "pipe:",
+		totalDuration:    totalDuration,
+		progressbar:      progressbar,
+		protocol:         "pipe:",
+		localizerService: localizerService,
 	}
 }
 
@@ -190,7 +212,9 @@ func (p progress) Run(stdOut io.ReadCloser, stdErr io.ReadCloser) error {
 
 	if isProcessCompleted == false {
 		if len(errorText) == 0 {
-			errorText = "не смогли отконвертировать видео"
+			errorText = p.localizerService.GetMessage(&i18n.LocalizeConfig{
+				MessageID: "errorConverter",
+			})
 		}
 		return errors.New(errorText)
 	}

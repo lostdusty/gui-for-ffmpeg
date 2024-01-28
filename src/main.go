@@ -3,19 +3,23 @@ package main
 import (
 	"errors"
 	"ffmpegGui/convertor"
-	myError "ffmpegGui/error"
+	error2 "ffmpegGui/error"
 	"ffmpegGui/handler"
+	"ffmpegGui/localizer"
 	"ffmpegGui/migration"
 	"ffmpegGui/setting"
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
+	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/widget"
 	_ "github.com/mattn/go-sqlite3"
+	"golang.org/x/text/language"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 	"os"
 )
 
-//const appVersion string = "0.1.1"
+//const appVersion string = "0.2.0"
 
 func main() {
 	a := app.New()
@@ -27,10 +31,16 @@ func main() {
 	w.Resize(fyne.Size{Width: 800, Height: 600})
 	w.CenterOnScreen()
 
-	errorView := myError.NewView(w)
+	localizerService, err := localizer.NewService("languages", language.Russian)
+	if err != nil {
+		panicErrorLang(w, err)
+		w.ShowAndRun()
+		return
+	}
 
+	errorView := error2.NewView(w, localizerService)
 	if canCreateFile("data/database") != true {
-		errorView.PanicError(errors.New("не смогли создать файл 'database' в папке 'data'"))
+		errorView.PanicErrorWriteDirectoryData()
 		w.ShowAndRun()
 		return
 	}
@@ -67,13 +77,14 @@ func main() {
 
 	ffPathUtilities := convertor.FFPathUtilities{FFmpeg: pathFFmpeg, FFprobe: pathFFprobe}
 
-	convertorView := convertor.NewView(w)
-	settingView := setting.NewView(w)
+	localizerView := localizer.NewView(w, localizerService)
+	convertorView := convertor.NewView(w, localizerService)
+	settingView := setting.NewView(w, localizerService)
 	convertorService := convertor.NewService(ffPathUtilities)
 	defer appCloseWithConvert(convertorService)
-	mainHandler := handler.NewConvertorHandler(convertorService, convertorView, settingView, settingRepository)
+	mainHandler := handler.NewConvertorHandler(convertorService, convertorView, settingView, localizerView, settingRepository, localizerService)
 
-	mainHandler.GetConvertor()
+	mainHandler.LanguageSelection()
 
 	w.ShowAndRun()
 }
@@ -98,4 +109,11 @@ func canCreateFile(path string) bool {
 	}
 	_ = file.Close()
 	return true
+}
+
+func panicErrorLang(w fyne.Window, err error) {
+	w.SetContent(container.NewVBox(
+		widget.NewLabel("Произошла ошибка!"),
+		widget.NewLabel("произошла ошибка при получении языковых переводах. \n\r"+err.Error()),
+	))
 }

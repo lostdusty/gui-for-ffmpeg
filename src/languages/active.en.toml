@@ -1,0 +1,75 @@
+[buttonForSelectedDirTitle]
+hash = "sha1-52b13f1b13e82d22e8c4102332db5d4ec551247b"
+other = "Folder where it will be saved:"
+
+[checkboxOverwriteOutputFilesTitle]
+hash = "sha1-5860124bb781e7ef680f573fa93977e96328d4e7"
+other = "Allow file to be overwritten"
+
+[choose]
+hash = "sha1-f60bb5f761024d973834b5e9d25ceebce2c85f94"
+other = "choose"
+
+[converterVideoFilesSubmitTitle]
+hash = "sha1-7ac460f3c24c9952082f2db6e4d62f752598709c"
+other = "Convert"
+
+[converterVideoFilesTitle]
+hash = "sha1-4d972809e4c7f9c9ff2c110a126bbc183c9429ce"
+other = "Converter video files to mp4"
+
+[error]
+hash = "sha1-a7df8f8b5d754f226ac4cb320577fe692b33e483"
+other = "An error has occurred!"
+
+[errorConverter]
+hash = "sha1-55ebddceddb8b044e33cc3893ec2eba7bbd9fcf9"
+other = "Couldn't convert video"
+
+[errorDatabase]
+hash = "sha1-531abc3f0d12727e542df6e5a22de91098380fc1"
+other = "could not create file 'database' in folder 'data'"
+
+[errorFFmpeg]
+hash = "sha1-ccf0b95c0d1b392dc215258d917eb4e5d0b88ed0"
+other = "this is not FFmpeg"
+
+[errorFFprobe]
+hash = "sha1-86d1b0b4c4ccd6a4f71e758fc67ce11aff4ba9b8"
+other = "this is not FFprobe"
+
+[errorSelectedFolderSave]
+hash = "sha1-83da899677cdc90e4344e3b94ee03c46b51bee4c"
+other = "You haven't selected a folder to save!"
+
+[fileVideoForConversionTitle]
+hash = "sha1-5e727d4a2ff3f21080e51e81641595b2e668f3be"
+other = "File for conversion:"
+
+[languageSelectionFormHead]
+hash = "sha1-0ff5fa82cf684112660128cba1711297acf11003"
+other = "Switch language"
+
+[languageSelectionHead]
+hash = "sha1-daf1108fc10d3b1a908288d611f749b3cc651e4b"
+other = "Choose language"
+
+[pathToFfmpeg]
+hash = "sha1-2eba439f365640ff77e0ed6a7486fcb662573850"
+other = "Path to ffmpeg:"
+
+[pathToFfprobe]
+hash = "sha1-02ad53337801906f8ebfee4616100dd9f43eabd7"
+other = "Path to ffprobe:"
+
+[save]
+hash = "sha1-4864057d626a868fa60f999bed3191d61d045ddc"
+other = "Save"
+
+[selectFFPathTitle]
+hash = "sha1-95581446a28d968ff1a027c623159a7eb08654cf"
+other = "Specify the path to FFmpeg and FFprobe"
+
+[titleDownloadLink]
+hash = "sha1-92df86371f6c3a06ca1e4754f113142776a32d49"
+other = "You can download it from here"

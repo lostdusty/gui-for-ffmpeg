@@ -1,9 +1,11 @@
 package error
 
 import (
+	"ffmpegGui/localizer"
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/widget"
+	"github.com/nicksnyder/go-i18n/v2/i18n"
 )
 
 type ViewContract interface {
@@ -11,16 +13,54 @@ type ViewContract interface {
 }
 
 type View struct {
-	w fyne.Window
+	w                fyne.Window
+	localizerService localizer.ServiceContract
 }
 
-func NewView(w fyne.Window) *View {
-	return &View{w}
+func NewView(w fyne.Window, localizerService localizer.ServiceContract) *View {
+	return &View{
+		w:                w,
+		localizerService: localizerService,
+	}
 }
 
 func (v View) PanicError(err error) {
-	v.w.SetContent(container.NewVBox(
-		widget.NewLabel("Произошла ошибка!"),
-		widget.NewLabel("Ошибка: "+err.Error()),
+	messageHead := v.localizerService.GetMessage(&i18n.LocalizeConfig{
+		MessageID: "error",
+	})
+
+	v.w.SetContent(container.NewBorder(
+		container.NewVBox(
+			widget.NewLabel(messageHead),
+			widget.NewLabel(err.Error()),
+		),
+		nil,
+		nil,
+		nil,
+		localizer.LanguageSelectionForm(v.localizerService, func(lang localizer.Lang) {
+			v.PanicError(err)
+		}),
+	))
+}
+
+func (v View) PanicErrorWriteDirectoryData() {
+	message := v.localizerService.GetMessage(&i18n.LocalizeConfig{
+		MessageID: "errorDatabase",
+	})
+	messageHead := v.localizerService.GetMessage(&i18n.LocalizeConfig{
+		MessageID: "error",
+	})
+
+	v.w.SetContent(container.NewBorder(
+		container.NewVBox(
+			widget.NewLabel(messageHead),
+			widget.NewLabel(message),
+		),
+		nil,
+		nil,
+		nil,
+		localizer.LanguageSelectionForm(v.localizerService, func(lang localizer.Lang) {
+			v.PanicErrorWriteDirectoryData()
+		}),
 	))
 }
