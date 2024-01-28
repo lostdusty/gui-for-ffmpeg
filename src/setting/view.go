@@ -1,11 +1,14 @@
 package setting
 
 import (
+	"ffmpegGui/helper"
+	"ffmpegGui/localizer"
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/widget"
+	"github.com/nicksnyder/go-i18n/v2/i18n"
 	"image/color"
 	"net/url"
 )
@@ -15,11 +18,15 @@ type ViewContract interface {
 }
 
 type View struct {
-	w fyne.Window
+	w                fyne.Window
+	localizerService localizer.ServiceContract
 }
 
-func NewView(w fyne.Window) *View {
-	return &View{w}
+func NewView(w fyne.Window, localizerService localizer.ServiceContract) *View {
+	return &View{
+		w:                w,
+		localizerService: localizerService,
+	}
 }
 
 func (v View) SelectFFPath(save func(ffmpegPath string, ffprobePath string) error) {
@@ -38,14 +45,37 @@ func (v View) SelectFFPath(save func(ffmpegPath string, ffprobePath string) erro
 
 	form := &widget.Form{
 		Items: []*widget.FormItem{
-			{Text: "Скачать можно от сюда", Widget: link},
-			{Text: "Путь к ffmpeg:", Widget: buttonFFmpeg},
-			{Widget: buttonFFmpegMessage},
-			{Text: "Путь к ffprobe:", Widget: buttonFFprobe},
-			{Widget: buttonFFprobeMessage},
-			{Widget: errorMessage},
+			{
+				Text: v.localizerService.GetMessage(&i18n.LocalizeConfig{
+					MessageID: "titleDownloadLink",
+				}),
+				Widget: link,
+			},
+			{
+				Text: v.localizerService.GetMessage(&i18n.LocalizeConfig{
+					MessageID: "pathToFfmpeg",
+				}),
+				Widget: buttonFFmpeg,
+			},
+			{
+				Widget: buttonFFmpegMessage,
+			},
+			{
+				Text: v.localizerService.GetMessage(&i18n.LocalizeConfig{
+					MessageID: "pathToFfprobe",
+				}),
+				Widget: buttonFFprobe,
+			},
+			{
+				Widget: buttonFFprobeMessage,
+			},
+			{
+				Widget: errorMessage,
+			},
 		},
-		SubmitText: "Сохранить",
+		SubmitText: v.localizerService.GetMessage(&i18n.LocalizeConfig{
+			MessageID: "save",
+		}),
 		OnSubmit: func() {
 			err := save(string(*ffmpegPath), string(*ffprobePath))
 			if err != nil {
@@ -53,7 +83,10 @@ func (v View) SelectFFPath(save func(ffmpegPath string, ffprobePath string) erro
 			}
 		},
 	}
-	v.w.SetContent(widget.NewCard("Укажите путь к FFmpeg и к FFprobe", "", container.NewVBox(form)))
+	selectFFPathTitle := v.localizerService.GetMessage(&i18n.LocalizeConfig{
+		MessageID: "selectFFPathTitle",
+	})
+	v.w.SetContent(widget.NewCard(selectFFPathTitle, "", container.NewVBox(form)))
 }
 
 func (v View) getButtonSelectFile() (filePath *string, button *widget.Button, buttonMessage *canvas.Text) {
@@ -64,7 +97,11 @@ func (v View) getButtonSelectFile() (filePath *string, button *widget.Button, bu
 	buttonMessage.TextSize = 16
 	buttonMessage.TextStyle = fyne.TextStyle{Bold: true}
 
-	button = widget.NewButton("выбрать", func() {
+	buttonTitle := v.localizerService.GetMessage(&i18n.LocalizeConfig{
+		MessageID: "choose",
+	})
+
+	button = widget.NewButton(buttonTitle, func() {
 		fileDialog := dialog.NewFileOpen(
 			func(r fyne.URIReadCloser, err error) {
 				if err != nil {
@@ -81,6 +118,7 @@ func (v View) getButtonSelectFile() (filePath *string, button *widget.Button, bu
 				buttonMessage.Text = r.URI().Path()
 				setStringSuccessStyle(buttonMessage)
 			}, v.w)
+		helper.FileDialogResize(fileDialog, v.w)
 		fileDialog.Show()
 	})
 
