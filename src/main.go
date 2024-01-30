@@ -27,7 +27,7 @@ func main() {
 	if err == nil {
 		a.SetIcon(iconResource)
 	}
-	w := a.NewWindow("GUI FFMpeg!")
+	w := a.NewWindow("FFMpeg GUI!")
 	w.Resize(fyne.Size{Width: 800, Height: 600})
 	w.CenterOnScreen()
 
