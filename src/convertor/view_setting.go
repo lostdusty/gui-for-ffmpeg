@@ -86,7 +86,7 @@ func (v View) SelectFFPath(
 func (v View) getButtonSelectFile(path string) (filePath *string, button *widget.Button, buttonMessage *canvas.Text) {
 	filePath = &path
 
-	buttonMessage = canvas.NewText(path, color.RGBA{49, 127, 114, 255})
+	buttonMessage = canvas.NewText(path, color.RGBA{R: 49, G: 127, B: 114, A: 255})
 	buttonMessage.TextSize = 16
 	buttonMessage.TextStyle = fyne.TextStyle{Bold: true}
 
