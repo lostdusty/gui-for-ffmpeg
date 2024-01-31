@@ -6,7 +6,6 @@ import (
 	"ffmpegGui/convertor"
 	"ffmpegGui/helper"
 	"ffmpegGui/localizer"
-	"ffmpegGui/setting"
 	"fyne.io/fyne/v2/widget"
 	"github.com/nicksnyder/go-i18n/v2/i18n"
 	"io"
@@ -17,26 +16,27 @@ import (
 
 type ConvertorHandlerContract interface {
 	MainConvertor()
+	FfPathSelection()
 }
 
 type ConvertorHandler struct {
-	convertorService  convertor.ServiceContract
-	convertorView     convertor.ViewContract
-	settingRepository setting.RepositoryContract
-	localizerService  localizer.ServiceContract
+	convertorService    convertor.ServiceContract
+	convertorView       convertor.ViewContract
+	convertorRepository convertor.RepositoryContract
+	localizerService    localizer.ServiceContract
 }
 
 func NewConvertorHandler(
 	convertorService convertor.ServiceContract,
 	convertorView convertor.ViewContract,
-	settingRepository setting.RepositoryContract,
+	convertorRepository convertor.RepositoryContract,
 	localizerService localizer.ServiceContract,
 ) *ConvertorHandler {
 	return &ConvertorHandler{
-		convertorService:  convertorService,
-		convertorView:     convertorView,
-		settingRepository: settingRepository,
-		localizerService:  localizerService,
+		convertorService:    convertorService,
+		convertorView:       convertorView,
+		convertorRepository: convertorRepository,
+		localizerService:    localizerService,
 	}
 }
 
@@ -45,7 +45,13 @@ func (h ConvertorHandler) MainConvertor() {
 		h.convertorView.Main(h.runConvert)
 		return
 	}
-	h.convertorView.SelectFFPath(h.saveSettingFFPath)
+	h.convertorView.SelectFFPath("", "", h.saveSettingFFPath, nil)
+}
+
+func (h ConvertorHandler) FfPathSelection() {
+	ffmpeg, _ := h.convertorRepository.GetPathFfmpeg()
+	ffprobe, _ := h.convertorRepository.GetPathFfprobe()
+	h.convertorView.SelectFFPath(ffmpeg, ffprobe, h.saveSettingFFPath, h.MainConvertor)
 }
 
 func (h ConvertorHandler) runConvert(setting convertor.HandleConvertSetting, progressbar *widget.ProgressBar) error {
@@ -84,10 +90,8 @@ func (h ConvertorHandler) checkingFFPathUtilities() bool {
 		if ffprobeChecking == false {
 			continue
 		}
-		ffmpegEntity := setting.Setting{Code: "ffmpeg", Value: item.FFmpeg}
-		_, _ = h.settingRepository.Create(ffmpegEntity)
-		ffprobeEntity := setting.Setting{Code: "ffprobe", Value: item.FFprobe}
-		_, _ = h.settingRepository.Create(ffprobeEntity)
+		_, _ = h.convertorRepository.SavePathFfmpeg(item.FFmpeg)
+		_, _ = h.convertorRepository.SavePathFfprobe(item.FFprobe)
 		return true
 	}
 
@@ -111,10 +115,8 @@ func (h ConvertorHandler) saveSettingFFPath(ffmpegPath string, ffprobePath strin
 		return errors.New(errorText)
 	}
 
-	ffmpegEntity := setting.Setting{Code: "ffmpeg", Value: ffmpegPath}
-	_, _ = h.settingRepository.Create(ffmpegEntity)
-	ffprobeEntity := setting.Setting{Code: "ffprobe", Value: ffprobePath}
-	_, _ = h.settingRepository.Create(ffprobeEntity)
+	_, _ = h.convertorRepository.SavePathFfmpeg(ffmpegPath)
+	_, _ = h.convertorRepository.SavePathFfprobe(ffprobePath)
 
 	h.MainConvertor()
 

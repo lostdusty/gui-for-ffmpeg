@@ -51,9 +51,14 @@ func (h MenuHandler) GetMainMenu() *fyne.MainMenu {
 	}), h.LanguageSelection)
 	h.menuItems.menuItem["changeLanguage"] = languageSelection
 
+	ffPathSelection := fyne.NewMenuItem(h.localizerService.GetMessage(&i18n.LocalizeConfig{
+		MessageID: "changeFFPath",
+	}), h.convertorHandler.FfPathSelection)
+	h.menuItems.menuItem["changeFFPath"] = ffPathSelection
+
 	settings := fyne.NewMenu(h.localizerService.GetMessage(&i18n.LocalizeConfig{
 		MessageID: "settings",
-	}), languageSelection, quit)
+	}), languageSelection, ffPathSelection, quit)
 	h.menuItems.menu["settings"] = settings
 
 	return fyne.NewMainMenu(settings)

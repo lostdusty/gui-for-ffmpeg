@@ -18,7 +18,10 @@ type ViewContract interface {
 		runConvert func(setting HandleConvertSetting, progressbar *widget.ProgressBar) error,
 	)
 	SelectFFPath(
-		func(ffmpegPath string, ffprobePath string) error,
+		ffmpegPath string,
+		ffprobePath string,
+		save func(ffmpegPath string, ffprobePath string) error,
+		cancel func(),
 	)
 }
 

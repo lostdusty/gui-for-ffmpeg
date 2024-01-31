@@ -2,6 +2,14 @@
 hash = "sha1-52b13f1b13e82d22e8c4102332db5d4ec551247b"
 other = "Folder where it will be saved:"
 
+[cancel]
+hash = "sha1-0ec753be8df955a117404fb634b01b45eb386e2a"
+other = "Cancel"
+
+[changeFFPath]
+hash = "sha1-46793a2844600d0eb19fa3540fb9564ee5705491"
+other = "FFmpeg and FFprobe"
+
 [changeLanguage]
 hash = "sha1-8b276eaf378d485c769fb3d5dcc06dfc25b0c01b"
 other = "Change language"

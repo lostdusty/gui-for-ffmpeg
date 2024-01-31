@@ -62,13 +62,14 @@ func main() {
 	}
 
 	settingRepository := setting.NewRepository(db)
-	pathFFmpeg, err := settingRepository.GetValue("ffmpeg")
+	convertorRepository := convertor.NewRepository(settingRepository)
+	pathFFmpeg, err := convertorRepository.GetPathFfmpeg()
 	if err != nil && errors.Is(err, gorm.ErrRecordNotFound) == false {
 		errorView.PanicError(err)
 		w.ShowAndRun()
 		return
 	}
-	pathFFprobe, err := settingRepository.GetValue("ffprobe")
+	pathFFprobe, err := convertorRepository.GetPathFfprobe()
 	if err != nil && errors.Is(err, gorm.ErrRecordNotFound) == false {
 		errorView.PanicError(err)
 		w.ShowAndRun()
@@ -81,7 +82,7 @@ func main() {
 	convertorView := convertor.NewView(w, localizerService)
 	convertorService := convertor.NewService(ffPathUtilities)
 	defer appCloseWithConvert(convertorService)
-	convertorHandler := handler.NewConvertorHandler(convertorService, convertorView, settingRepository, localizerService)
+	convertorHandler := handler.NewConvertorHandler(convertorService, convertorView, convertorRepository, localizerService)
 
 	localizerRepository := localizer.NewRepository(settingRepository)
 	mainMenu := handler.NewMenuHandler(convertorHandler, localizerService, localizerView, localizerRepository)

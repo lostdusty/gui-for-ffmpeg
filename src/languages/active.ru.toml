@@ -1,4 +1,6 @@
 buttonForSelectedDirTitle = "Папка куда будет сохраняться:"
+cancel = "Отмена"
+changeFFPath = "FFmpeg и FFprobe"
 changeLanguage = "Поменять язык"
 checkboxOverwriteOutputFilesTitle = "Разрешить перезаписать файл"
 choose = "выбрать"

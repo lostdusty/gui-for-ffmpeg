@@ -12,13 +12,18 @@ import (
 	"net/url"
 )
 
-func (v View) SelectFFPath(save func(ffmpegPath string, ffprobePath string) error) {
+func (v View) SelectFFPath(
+	currentPathFfmpeg string,
+	currentPathFfprobe string,
+	save func(ffmpegPath string, ffprobePath string) error,
+	cancel func(),
+) {
 	errorMessage := canvas.NewText("", color.RGBA{255, 0, 0, 255})
 	errorMessage.TextSize = 16
 	errorMessage.TextStyle = fyne.TextStyle{Bold: true}
 
-	ffmpegPath, buttonFFmpeg, buttonFFmpegMessage := v.getButtonSelectFile()
-	ffprobePath, buttonFFprobe, buttonFFprobeMessage := v.getButtonSelectFile()
+	ffmpegPath, buttonFFmpeg, buttonFFmpegMessage := v.getButtonSelectFile(currentPathFfmpeg)
+	ffprobePath, buttonFFprobe, buttonFFprobeMessage := v.getButtonSelectFile(currentPathFfprobe)
 
 	link := widget.NewHyperlink("https://ffmpeg.org/download.html", &url.URL{
 		Scheme: "https",
@@ -60,11 +65,17 @@ func (v View) SelectFFPath(save func(ffmpegPath string, ffprobePath string) erro
 			MessageID: "save",
 		}),
 		OnSubmit: func() {
-			err := save(string(*ffmpegPath), string(*ffprobePath))
+			err := save(*ffmpegPath, *ffprobePath)
 			if err != nil {
 				errorMessage.Text = err.Error()
 			}
 		},
+	}
+	if cancel != nil {
+		form.OnCancel = cancel
+		form.CancelText = v.localizerService.GetMessage(&i18n.LocalizeConfig{
+			MessageID: "cancel",
+		})
 	}
 	selectFFPathTitle := v.localizerService.GetMessage(&i18n.LocalizeConfig{
 		MessageID: "selectFFPathTitle",
@@ -72,11 +83,10 @@ func (v View) SelectFFPath(save func(ffmpegPath string, ffprobePath string) erro
 	v.w.SetContent(widget.NewCard(selectFFPathTitle, "", container.NewVBox(form)))
 }
 
-func (v View) getButtonSelectFile() (filePath *string, button *widget.Button, buttonMessage *canvas.Text) {
-	path := ""
+func (v View) getButtonSelectFile(path string) (filePath *string, button *widget.Button, buttonMessage *canvas.Text) {
 	filePath = &path
 
-	buttonMessage = canvas.NewText("", color.RGBA{255, 0, 0, 255})
+	buttonMessage = canvas.NewText(path, color.RGBA{49, 127, 114, 255})
 	buttonMessage.TextSize = 16
 	buttonMessage.TextStyle = fyne.TextStyle{Bold: true}
 
