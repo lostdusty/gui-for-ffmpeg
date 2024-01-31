@@ -54,7 +54,7 @@ func (v View) Main(
 ) {
 	form := &widget.Form{}
 
-	conversionMessage := canvas.NewText("", color.RGBA{255, 0, 0, 255})
+	conversionMessage := canvas.NewText("", color.RGBA{R: 255, G: 0, B: 0, A: 255})
 	conversionMessage.TextSize = 16
 	conversionMessage.TextStyle = fyne.TextStyle{Bold: true}
 
@@ -138,7 +138,7 @@ func (v View) Main(
 func (v View) getButtonFileVideoForConversion(form *widget.Form, progress *widget.ProgressBar, conversionMessage *canvas.Text) (*widget.Button, *canvas.Text, *File) {
 	fileInput := &File{}
 
-	fileVideoForConversionMessage := canvas.NewText("", color.RGBA{255, 0, 0, 255})
+	fileVideoForConversionMessage := canvas.NewText("", color.RGBA{R: 255, G: 0, B: 0, A: 255})
 	fileVideoForConversionMessage.TextSize = 16
 	fileVideoForConversionMessage.TextStyle = fyne.TextStyle{Bold: true}
 
@@ -178,7 +178,7 @@ func (v View) getButtonFileVideoForConversion(form *widget.Form, progress *widge
 }
 
 func (v View) getButtonForSelectingDirectoryForSaving() (button *widget.Button, buttonMessage *canvas.Text, dirPath *string) {
-	buttonMessage = canvas.NewText("", color.RGBA{255, 0, 0, 255})
+	buttonMessage = canvas.NewText("", color.RGBA{R: 255, G: 0, B: 0, A: 255})
 	buttonMessage.TextSize = 16
 	buttonMessage.TextStyle = fyne.TextStyle{Bold: true}
 
@@ -214,12 +214,12 @@ func (v View) getButtonForSelectingDirectoryForSaving() (button *widget.Button, 
 }
 
 func setStringErrorStyle(text *canvas.Text) {
-	text.Color = color.RGBA{255, 0, 0, 255}
+	text.Color = color.RGBA{R: 255, G: 0, B: 0, A: 255}
 	text.Refresh()
 }
 
 func setStringSuccessStyle(text *canvas.Text) {
-	text.Color = color.RGBA{49, 127, 114, 255}
+	text.Color = color.RGBA{R: 49, G: 127, B: 114, A: 255}
 	text.Refresh()
 }
 
