@@ -68,12 +68,12 @@ func initLanguages(directory string, bundle *i18n.Bundle) ([]Lang, error) {
 		return nil, err
 	}
 	for _, file := range files {
-		language, err := bundle.LoadMessageFile(file)
+		lang, err := bundle.LoadMessageFile(file)
 		if err != nil {
 			return nil, err
 		}
-		title := cases.Title(language.Tag).String(display.Self.Name(language.Tag))
-		languages = append(languages, Lang{Code: language.Tag.String(), Title: title})
+		title := cases.Title(lang.Tag).String(display.Self.Name(lang.Tag))
+		languages = append(languages, Lang{Code: lang.Tag.String(), Title: title})
 	}
 
 	sort.Sort(languagesSort(languages))
@@ -103,13 +103,12 @@ func (s Service) SetCurrentLanguage(lang Lang) error {
 }
 
 func (s Service) SetCurrentLanguageByCode(code string) error {
-	language, err := language.Parse(code)
+	lang, err := language.Parse(code)
 	if err != nil {
 		return err
 	}
-	title := cases.Title(language).String(display.Self.Name(language))
-	lang := Lang{Code: language.String(), Title: title}
-	return s.SetCurrentLanguage(lang)
+	title := cases.Title(lang).String(display.Self.Name(lang))
+	return s.SetCurrentLanguage(Lang{Code: lang.String(), Title: title})
 }
 
 func (s Service) GetCurrentLanguage() *CurrentLanguage {

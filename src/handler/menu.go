@@ -61,7 +61,7 @@ func (h MenuHandler) GetMainMenu() *fyne.MainMenu {
 
 func (h MenuHandler) LanguageSelection() {
 	h.localizerView.LanguageSelection(func(lang localizer.Lang) {
-		h.localizerRepository.Save(lang.Code)
+		_, _ = h.localizerRepository.Save(lang.Code)
 		h.menuMessageReload()
 		h.convertorHandler.MainConvertor()
 	})

@@ -135,15 +135,15 @@ func (h ConvertorHandler) checkingFFPath() bool {
 	return true
 }
 
-type progress struct {
+type Progress struct {
 	totalDuration    float64
 	progressbar      *widget.ProgressBar
 	protocol         string
 	localizerService localizer.ServiceContract
 }
 
-func NewProgress(totalDuration float64, progressbar *widget.ProgressBar, localizerService localizer.ServiceContract) progress {
-	return progress{
+func NewProgress(totalDuration float64, progressbar *widget.ProgressBar, localizerService localizer.ServiceContract) Progress {
+	return Progress{
 		totalDuration:    totalDuration,
 		progressbar:      progressbar,
 		protocol:         "pipe:",
@@ -151,11 +151,11 @@ func NewProgress(totalDuration float64, progressbar *widget.ProgressBar, localiz
 	}
 }
 
-func (p progress) GetProtocole() string {
+func (p Progress) GetProtocole() string {
 	return p.protocol
 }
 
-func (p progress) Run(stdOut io.ReadCloser, stdErr io.ReadCloser) error {
+func (p Progress) Run(stdOut io.ReadCloser, stdErr io.ReadCloser) error {
 	isProcessCompleted := false
 	var errorText string
 
