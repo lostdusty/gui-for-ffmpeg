@@ -2,6 +2,10 @@
 hash = "sha1-52b13f1b13e82d22e8c4102332db5d4ec551247b"
 other = "Файлды сақтауға арналған каталог:"
 
+[changeLanguage]
+hash = "sha1-8b276eaf378d485c769fb3d5dcc06dfc25b0c01b"
+other = "Тілді өзгерту"
+
 [checkboxOverwriteOutputFilesTitle]
 hash = "sha1-5860124bb781e7ef680f573fa93977e96328d4e7"
 other = "Файлды қайта жазуға рұқсат беріңіз"
@@ -42,6 +46,10 @@ other = "бұл FFprobe емес"
 hash = "sha1-83da899677cdc90e4344e3b94ee03c46b51bee4c"
 other = "Сіз сақталатын қалтаны таңдамадыңыз!"
 
+[exit]
+hash = "sha1-c42457057d1ab7950cea00719cbe0b078891775f"
+other = "Шығу"
+
 [fileVideoForConversionTitle]
 hash = "sha1-5e727d4a2ff3f21080e51e81641595b2e668f3be"
 other = "Түрлендіруге арналған файл:"
@@ -69,6 +77,10 @@ other = "Сақтау"
 [selectFFPathTitle]
 hash = "sha1-95581446a28d968ff1a027c623159a7eb08654cf"
 other = "FFmpeg және FFprobe жолын көрсетіңіз"
+
+[settings]
+hash = "sha1-7f17c7c62a7fd8d1a508481f4778688927734c2f"
+other = "Параметрлер"
 
 [titleDownloadLink]
 hash = "sha1-92df86371f6c3a06ca1e4754f113142776a32d49"

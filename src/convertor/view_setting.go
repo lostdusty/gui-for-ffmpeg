@@ -1,8 +1,7 @@
-package setting
+package convertor
 
 import (
 	"ffmpegGui/helper"
-	"ffmpegGui/localizer"
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
@@ -12,22 +11,6 @@ import (
 	"image/color"
 	"net/url"
 )
-
-type ViewContract interface {
-	SelectFFPath(func(ffmpegPath string, ffprobePath string) error)
-}
-
-type View struct {
-	w                fyne.Window
-	localizerService localizer.ServiceContract
-}
-
-func NewView(w fyne.Window, localizerService localizer.ServiceContract) *View {
-	return &View{
-		w:                w,
-		localizerService: localizerService,
-	}
-}
 
 func (v View) SelectFFPath(save func(ffmpegPath string, ffprobePath string) error) {
 	errorMessage := canvas.NewText("", color.RGBA{255, 0, 0, 255})
@@ -123,14 +106,4 @@ func (v View) getButtonSelectFile() (filePath *string, button *widget.Button, bu
 	})
 
 	return
-}
-
-func setStringErrorStyle(text *canvas.Text) {
-	text.Color = color.RGBA{255, 0, 0, 255}
-	text.Refresh()
-}
-
-func setStringSuccessStyle(text *canvas.Text) {
-	text.Color = color.RGBA{49, 127, 114, 255}
-	text.Refresh()
 }

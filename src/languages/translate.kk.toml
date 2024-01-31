@@ -1,0 +1,11 @@
+[changeLanguage]
+hash = "sha1-8b276eaf378d485c769fb3d5dcc06dfc25b0c01b"
+other = "Тілді өзгерту"
+
+[exit]
+hash = "sha1-c42457057d1ab7950cea00719cbe0b078891775f"
+other = "Шығу"
+
+[settings]
+hash = "sha1-7f17c7c62a7fd8d1a508481f4778688927734c2f"
+other = "Параметрлер"

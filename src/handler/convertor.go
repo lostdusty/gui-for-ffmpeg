@@ -15,11 +15,13 @@ import (
 	"strings"
 )
 
+type ConvertorHandlerContract interface {
+	MainConvertor()
+}
+
 type ConvertorHandler struct {
 	convertorService  convertor.ServiceContract
 	convertorView     convertor.ViewContract
-	settingView       setting.ViewContract
-	localizerView     localizer.ViewContract
 	settingRepository setting.RepositoryContract
 	localizerService  localizer.ServiceContract
 }
@@ -27,33 +29,23 @@ type ConvertorHandler struct {
 func NewConvertorHandler(
 	convertorService convertor.ServiceContract,
 	convertorView convertor.ViewContract,
-	settingView setting.ViewContract,
-	localizerView localizer.ViewContract,
 	settingRepository setting.RepositoryContract,
 	localizerService localizer.ServiceContract,
 ) *ConvertorHandler {
 	return &ConvertorHandler{
 		convertorService:  convertorService,
 		convertorView:     convertorView,
-		settingView:       settingView,
-		localizerView:     localizerView,
 		settingRepository: settingRepository,
 		localizerService:  localizerService,
 	}
 }
 
-func (h ConvertorHandler) LanguageSelection() {
-	h.localizerView.LanguageSelection(func(lang localizer.Lang) {
-		h.GetConvertor()
-	})
-}
-
-func (h ConvertorHandler) GetConvertor() {
+func (h ConvertorHandler) MainConvertor() {
 	if h.checkingFFPathUtilities() == true {
 		h.convertorView.Main(h.runConvert)
 		return
 	}
-	h.settingView.SelectFFPath(h.saveSettingFFPath)
+	h.convertorView.SelectFFPath(h.saveSettingFFPath)
 }
 
 func (h ConvertorHandler) runConvert(setting convertor.HandleConvertSetting, progressbar *widget.ProgressBar) error {
@@ -124,7 +116,7 @@ func (h ConvertorHandler) saveSettingFFPath(ffmpegPath string, ffprobePath strin
 	ffprobeEntity := setting.Setting{Code: "ffprobe", Value: ffprobePath}
 	_, _ = h.settingRepository.Create(ffprobeEntity)
 
-	h.GetConvertor()
+	h.MainConvertor()
 
 	return nil
 }

@@ -14,6 +14,7 @@ type ServiceContract interface {
 	GetLanguages() []Lang
 	GetMessage(localizeConfig *i18n.LocalizeConfig) string
 	SetCurrentLanguage(lang Lang) error
+	SetCurrentLanguageByCode(code string) error
 	GetCurrentLanguage() *CurrentLanguage
 }
 
@@ -99,6 +100,16 @@ func (s Service) SetCurrentLanguage(lang Lang) error {
 	s.currentLanguage.Lang = lang
 	s.currentLanguage.localizer = i18n.NewLocalizer(s.bundle, lang.Code)
 	return nil
+}
+
+func (s Service) SetCurrentLanguageByCode(code string) error {
+	language, err := language.Parse(code)
+	if err != nil {
+		return err
+	}
+	title := cases.Title(language).String(display.Self.Name(language))
+	lang := Lang{Code: language.String(), Title: title}
+	return s.SetCurrentLanguage(lang)
 }
 
 func (s Service) GetCurrentLanguage() *CurrentLanguage {

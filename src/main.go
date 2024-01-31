@@ -79,12 +79,17 @@ func main() {
 
 	localizerView := localizer.NewView(w, localizerService)
 	convertorView := convertor.NewView(w, localizerService)
-	settingView := setting.NewView(w, localizerService)
 	convertorService := convertor.NewService(ffPathUtilities)
 	defer appCloseWithConvert(convertorService)
-	mainHandler := handler.NewConvertorHandler(convertorService, convertorView, settingView, localizerView, settingRepository, localizerService)
+	convertorHandler := handler.NewConvertorHandler(convertorService, convertorView, settingRepository, localizerService)
 
-	mainHandler.LanguageSelection()
+	localizerRepository := localizer.NewRepository(settingRepository)
+	mainMenu := handler.NewMenuHandler(convertorHandler, localizerService, localizerView, localizerRepository)
+
+	mainHandler := handler.NewMainHandler(convertorHandler, mainMenu, localizerRepository, localizerService)
+	mainHandler.Start()
+
+	w.SetMainMenu(mainMenu.GetMainMenu())
 
 	w.ShowAndRun()
 }
