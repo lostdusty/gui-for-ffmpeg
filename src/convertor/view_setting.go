@@ -18,7 +18,7 @@ func (v View) SelectFFPath(
 	save func(ffmpegPath string, ffprobePath string) error,
 	cancel func(),
 ) {
-	errorMessage := canvas.NewText("", color.RGBA{255, 0, 0, 255})
+	errorMessage := canvas.NewText("", color.RGBA{R: 255, G: 0, B: 0, A: 255})
 	errorMessage.TextSize = 16
 	errorMessage.TextStyle = fyne.TextStyle{Bold: true}
 
