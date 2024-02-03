@@ -3,10 +3,10 @@ package handler
 import (
 	"bufio"
 	"errors"
-	"ffmpegGui/convertor"
-	"ffmpegGui/helper"
-	"ffmpegGui/localizer"
 	"fyne.io/fyne/v2/widget"
+	"git.kor-elf.net/kor-elf/gui-for-ffmpeg/convertor"
+	"git.kor-elf.net/kor-elf/gui-for-ffmpeg/helper"
+	"git.kor-elf.net/kor-elf/gui-for-ffmpeg/localizer"
 	"github.com/nicksnyder/go-i18n/v2/i18n"
 	"io"
 	"regexp"

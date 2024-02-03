@@ -1,7 +1,7 @@
 package localizer
 
 import (
-	"ffmpegGui/setting"
+	"git.kor-elf.net/kor-elf/gui-for-ffmpeg/setting"
 )
 
 type RepositoryContract interface {

@@ -2,7 +2,7 @@ package convertor
 
 import (
 	"errors"
-	"ffmpegGui/helper"
+	"git.kor-elf.net/kor-elf/gui-for-ffmpeg/helper"
 	"io"
 	"os/exec"
 	"regexp"
