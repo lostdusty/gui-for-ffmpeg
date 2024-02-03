@@ -1,3 +1,47 @@
-[changeFFPath]
-hash = "sha1-46793a2844600d0eb19fa3540fb9564ee5705491"
-other = "FFmpeg and FFprobe"
+[about]
+hash = "sha1-3da0b9ef719fd707f443ac00404447f29445976f"
+other = "About"
+
+[aboutText]
+hash = "sha1-8bd565814118ba8b90c40eb5b62acf8d2676e7d6"
+other = "A simple interface for the FFmpeg console utility. \nBut I am not the author of the FFmpeg utility itself."
+
+[errorFFmpegVersion]
+hash = "sha1-9a4148d42186b6b32cf83bef726e23022c53283f"
+other = "Could not determine FFmpeg version"
+
+[errorFFprobeVersion]
+hash = "sha1-da7b37d7df3fafbd153665b13888413d52b24c17"
+other = "Failed to determine FFprobe version"
+
+[ffmpegLGPL]
+hash = "sha1-d395b16cc8f8eab98a8a970307c5b010ba22dde6"
+other = "This software uses libraries from the **FFmpeg** project under the **[LGPLv2.1](http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html)**."
+
+[ffmpegTrademark]
+hash = "sha1-45f772b2eca5098cd6d31f2d1dc6edec1987a617"
+other = "**FFmpeg** is a trademark of **[Fabrice Bellard](http://bellard.org/)**, originator of the **[FFmpeg](https://ffmpeg.org/about.html)** project."
+
+[help]
+hash = "sha1-6a45cef900c668effcb2ab10da05855c1fd10f6f"
+other = "Help"
+
+[licenseLink]
+hash = "sha1-ea18ab849f0eea030d770da82c2a6b3484a7bd13"
+other = "License information"
+
+[pathToFfmpeg]
+hash = "sha1-fafc50f1db0f720fe83a96cd70a9e1ad824e96b6"
+other = "Path to FFmpeg:"
+
+[pathToFfprobe]
+hash = "sha1-b872edc9633a2e81ef678dc46fe46a7e91732024"
+other = "Path to FFprobe:"
+
+[programmLink]
+hash = "sha1-18f9a3fad6aacefe1b05eed23122800b391ff5ca"
+other = "Project website"
+
+[programmVersion]
+hash = "sha1-fa2e4994a301bb24bc2a8fa166e5486ea95a7475"
+other = "**Program version:** {{.Version}}"

@@ -1,3 +1,11 @@
+[about]
+hash = "sha1-3da0b9ef719fd707f443ac00404447f29445976f"
+other = "Бағдарлама туралы"
+
+[aboutText]
+hash = "sha1-8bd565814118ba8b90c40eb5b62acf8d2676e7d6"
+other = "FFmpeg консоль утилитасы үшін қарапайым интерфейс. \nБірақ мен FFmpeg утилитасының авторы емеспін."
+
 [buttonForSelectedDirTitle]
 hash = "sha1-52b13f1b13e82d22e8c4102332db5d4ec551247b"
 other = "Файлды сақтауға арналған каталог:"
@@ -46,9 +54,17 @@ other = "'data' қалтасында 'database' файлын жасау мүмк
 hash = "sha1-ccf0b95c0d1b392dc215258d917eb4e5d0b88ed0"
 other = "бұл FFmpeg емес"
 
+[errorFFmpegVersion]
+hash = "sha1-9a4148d42186b6b32cf83bef726e23022c53283f"
+other = "FFmpeg нұсқасын анықтау мүмкін болмады"
+
 [errorFFprobe]
 hash = "sha1-86d1b0b4c4ccd6a4f71e758fc67ce11aff4ba9b8"
 other = "бұл FFprobe емес"
+
+[errorFFprobeVersion]
+hash = "sha1-da7b37d7df3fafbd153665b13888413d52b24c17"
+other = "FFprobe нұсқасын анықтау мүмкін болмады"
 
 [errorSelectedFolderSave]
 hash = "sha1-83da899677cdc90e4344e3b94ee03c46b51bee4c"
@@ -58,9 +74,21 @@ other = "Сіз сақталатын қалтаны таңдамадыңыз!"
 hash = "sha1-c42457057d1ab7950cea00719cbe0b078891775f"
 other = "Шығу"
 
+[ffmpegLGPL]
+hash = "sha1-d395b16cc8f8eab98a8a970307c5b010ba22dde6"
+other = "Бұл бағдарламалық құрал **[LGPLv2.1](http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html)** астында **FFmpeg** жобасының кітапханаларын пайдаланады."
+
+[ffmpegTrademark]
+hash = "sha1-45f772b2eca5098cd6d31f2d1dc6edec1987a617"
+other = "FFmpeg — **[FFmpeg](https://ffmpeg.org/about.html)** жобасын жасаушы **[Fabrice Bellard](http://bellard.org/)** сауда белгісі."
+
 [fileVideoForConversionTitle]
 hash = "sha1-5e727d4a2ff3f21080e51e81641595b2e668f3be"
 other = "Түрлендіруге арналған файл:"
+
+[help]
+hash = "sha1-6a45cef900c668effcb2ab10da05855c1fd10f6f"
+other = "Анықтама"
 
 [languageSelectionFormHead]
 hash = "sha1-0ff5fa82cf684112660128cba1711297acf11003"
@@ -70,13 +98,25 @@ other = "Тілді ауыстыру"
 hash = "sha1-daf1108fc10d3b1a908288d611f749b3cc651e4b"
 other = "Тілді таңдаңыз"
 
+[licenseLink]
+hash = "sha1-ea18ab849f0eea030d770da82c2a6b3484a7bd13"
+other = "Лицензия туралы ақпарат"
+
 [pathToFfmpeg]
-hash = "sha1-2eba439f365640ff77e0ed6a7486fcb662573850"
-other = "ffmpeg жол:"
+hash = "sha1-fafc50f1db0f720fe83a96cd70a9e1ad824e96b6"
+other = "FFmpeg жол:"
 
 [pathToFfprobe]
-hash = "sha1-02ad53337801906f8ebfee4616100dd9f43eabd7"
-other = "ffprobe жол:"
+hash = "sha1-b872edc9633a2e81ef678dc46fe46a7e91732024"
+other = "FFprobe жол:"
+
+[programmLink]
+hash = "sha1-18f9a3fad6aacefe1b05eed23122800b391ff5ca"
+other = "Жобаның веб-сайты"
+
+[programmVersion]
+hash = "sha1-fa2e4994a301bb24bc2a8fa166e5486ea95a7475"
+other = "**Бағдарлама нұсқасы:** {{.Version}}"
 
 [save]
 hash = "sha1-4864057d626a868fa60f999bed3191d61d045ddc"

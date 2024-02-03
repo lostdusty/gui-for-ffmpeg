@@ -6,6 +6,7 @@ import (
 	error2 "ffmpegGui/error"
 	"ffmpegGui/handler"
 	"ffmpegGui/localizer"
+	"ffmpegGui/menu"
 	"ffmpegGui/migration"
 	"ffmpegGui/setting"
 	"fyne.io/fyne/v2"
@@ -19,7 +20,7 @@ import (
 	"os"
 )
 
-//const appVersion string = "0.2.0"
+const appVersion string = "0.3.0"
 
 func main() {
 	a := app.New()
@@ -27,7 +28,7 @@ func main() {
 	if err == nil {
 		a.SetIcon(iconResource)
 	}
-	w := a.NewWindow("FFMpeg GUI!")
+	w := a.NewWindow("GUI for FFmpeg")
 	w.Resize(fyne.Size{Width: 800, Height: 600})
 	w.CenterOnScreen()
 
@@ -85,7 +86,8 @@ func main() {
 	convertorHandler := handler.NewConvertorHandler(convertorService, convertorView, convertorRepository, localizerService)
 
 	localizerRepository := localizer.NewRepository(settingRepository)
-	mainMenu := handler.NewMenuHandler(convertorHandler, localizerService, localizerView, localizerRepository)
+	menuView := menu.NewView(w, a, appVersion, localizerService)
+	mainMenu := handler.NewMenuHandler(convertorHandler, menuView, localizerService, localizerView, localizerRepository)
 
 	mainHandler := handler.NewMainHandler(convertorHandler, mainMenu, localizerRepository, localizerService)
 	mainHandler.Start()

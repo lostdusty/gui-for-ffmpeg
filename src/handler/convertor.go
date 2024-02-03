@@ -17,6 +17,8 @@ import (
 type ConvertorHandlerContract interface {
 	MainConvertor()
 	FfPathSelection()
+	GetFfmpegVersion() (string, error)
+	GetFfprobeVersion() (string, error)
 }
 
 type ConvertorHandler struct {
@@ -52,6 +54,14 @@ func (h ConvertorHandler) FfPathSelection() {
 	ffmpeg, _ := h.convertorRepository.GetPathFfmpeg()
 	ffprobe, _ := h.convertorRepository.GetPathFfprobe()
 	h.convertorView.SelectFFPath(ffmpeg, ffprobe, h.saveSettingFFPath, h.MainConvertor)
+}
+
+func (h ConvertorHandler) GetFfmpegVersion() (string, error) {
+	return h.convertorService.GetFFmpegVesrion()
+}
+
+func (h ConvertorHandler) GetFfprobeVersion() (string, error) {
+	return h.convertorService.GetFFprobeVersion()
 }
 
 func (h ConvertorHandler) runConvert(setting convertor.HandleConvertSetting, progressbar *widget.ProgressBar) error {

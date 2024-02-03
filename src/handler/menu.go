@@ -2,6 +2,7 @@ package handler
 
 import (
 	"ffmpegGui/localizer"
+	"ffmpegGui/menu"
 	"fyne.io/fyne/v2"
 	"github.com/nicksnyder/go-i18n/v2/i18n"
 )
@@ -18,6 +19,7 @@ type menuItems struct {
 
 type MenuHandler struct {
 	convertorHandler    ConvertorHandlerContract
+	menuView            menu.ViewContract
 	localizerService    localizer.ServiceContract
 	localizerView       localizer.ViewContract
 	localizerRepository localizer.RepositoryContract
@@ -26,12 +28,14 @@ type MenuHandler struct {
 
 func NewMenuHandler(
 	convertorHandler ConvertorHandlerContract,
+	menuView menu.ViewContract,
 	localizerService localizer.ServiceContract,
 	localizerView localizer.ViewContract,
 	localizerRepository localizer.RepositoryContract,
 ) *MenuHandler {
 	return &MenuHandler{
 		convertorHandler:    convertorHandler,
+		menuView:            menuView,
 		localizerService:    localizerService,
 		localizerView:       localizerView,
 		localizerRepository: localizerRepository,
@@ -40,6 +44,13 @@ func NewMenuHandler(
 }
 
 func (h MenuHandler) GetMainMenu() *fyne.MainMenu {
+	settings := h.getMenuSettings()
+	help := h.getMenuHelp()
+
+	return fyne.NewMainMenu(settings, help)
+}
+
+func (h MenuHandler) getMenuSettings() *fyne.Menu {
 	quit := fyne.NewMenuItem(h.localizerService.GetMessage(&i18n.LocalizeConfig{
 		MessageID: "exit",
 	}), nil)
@@ -61,7 +72,38 @@ func (h MenuHandler) GetMainMenu() *fyne.MainMenu {
 	}), languageSelection, ffPathSelection, quit)
 	h.menuItems.menu["settings"] = settings
 
-	return fyne.NewMainMenu(settings)
+	return settings
+}
+
+func (h MenuHandler) getMenuHelp() *fyne.Menu {
+	about := fyne.NewMenuItem(h.localizerService.GetMessage(&i18n.LocalizeConfig{
+		MessageID: "about",
+	}), h.openAbout)
+	h.menuItems.menuItem["about"] = about
+
+	help := fyne.NewMenu(h.localizerService.GetMessage(&i18n.LocalizeConfig{
+		MessageID: "help",
+	}), about)
+	h.menuItems.menu["help"] = help
+
+	return help
+}
+
+func (h MenuHandler) openAbout() {
+	ffmpeg, err := h.convertorHandler.GetFfmpegVersion()
+	if err != nil {
+		ffmpeg = h.localizerService.GetMessage(&i18n.LocalizeConfig{
+			MessageID: "errorFFmpegVersion",
+		})
+	}
+	ffprobe, err := h.convertorHandler.GetFfprobeVersion()
+	if err != nil {
+		ffprobe = h.localizerService.GetMessage(&i18n.LocalizeConfig{
+			MessageID: "errorFFprobeVersion",
+		})
+	}
+
+	h.menuView.About(ffmpeg, ffprobe)
 }
 
 func (h MenuHandler) LanguageSelection() {
