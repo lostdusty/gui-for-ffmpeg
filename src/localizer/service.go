@@ -14,6 +14,7 @@ type ServiceContract interface {
 	GetLanguages() []Lang
 	GetMessage(localizeConfig *i18n.LocalizeConfig) string
 	SetCurrentLanguage(lang Lang) error
+	SetCurrentLanguageByCode(code string) error
 	GetCurrentLanguage() *CurrentLanguage
 }
 
@@ -67,12 +68,12 @@ func initLanguages(directory string, bundle *i18n.Bundle) ([]Lang, error) {
 		return nil, err
 	}
 	for _, file := range files {
-		language, err := bundle.LoadMessageFile(file)
+		lang, err := bundle.LoadMessageFile(file)
 		if err != nil {
 			return nil, err
 		}
-		title := cases.Title(language.Tag).String(display.Self.Name(language.Tag))
-		languages = append(languages, Lang{Code: language.Tag.String(), Title: title})
+		title := cases.Title(lang.Tag).String(display.Self.Name(lang.Tag))
+		languages = append(languages, Lang{Code: lang.Tag.String(), Title: title})
 	}
 
 	sort.Sort(languagesSort(languages))
@@ -99,6 +100,15 @@ func (s Service) SetCurrentLanguage(lang Lang) error {
 	s.currentLanguage.Lang = lang
 	s.currentLanguage.localizer = i18n.NewLocalizer(s.bundle, lang.Code)
 	return nil
+}
+
+func (s Service) SetCurrentLanguageByCode(code string) error {
+	lang, err := language.Parse(code)
+	if err != nil {
+		return err
+	}
+	title := cases.Title(lang).String(display.Self.Name(lang))
+	return s.SetCurrentLanguage(Lang{Code: lang.String(), Title: title})
 }
 
 func (s Service) GetCurrentLanguage() *CurrentLanguage {

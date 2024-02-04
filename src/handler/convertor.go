@@ -3,11 +3,10 @@ package handler
 import (
 	"bufio"
 	"errors"
-	"ffmpegGui/convertor"
-	"ffmpegGui/helper"
-	"ffmpegGui/localizer"
-	"ffmpegGui/setting"
 	"fyne.io/fyne/v2/widget"
+	"git.kor-elf.net/kor-elf/gui-for-ffmpeg/convertor"
+	"git.kor-elf.net/kor-elf/gui-for-ffmpeg/helper"
+	"git.kor-elf.net/kor-elf/gui-for-ffmpeg/localizer"
 	"github.com/nicksnyder/go-i18n/v2/i18n"
 	"io"
 	"regexp"
@@ -15,45 +14,54 @@ import (
 	"strings"
 )
 
+type ConvertorHandlerContract interface {
+	MainConvertor()
+	FfPathSelection()
+	GetFfmpegVersion() (string, error)
+	GetFfprobeVersion() (string, error)
+}
+
 type ConvertorHandler struct {
-	convertorService  convertor.ServiceContract
-	convertorView     convertor.ViewContract
-	settingView       setting.ViewContract
-	localizerView     localizer.ViewContract
-	settingRepository setting.RepositoryContract
-	localizerService  localizer.ServiceContract
+	convertorService    convertor.ServiceContract
+	convertorView       convertor.ViewContract
+	convertorRepository convertor.RepositoryContract
+	localizerService    localizer.ServiceContract
 }
 
 func NewConvertorHandler(
 	convertorService convertor.ServiceContract,
 	convertorView convertor.ViewContract,
-	settingView setting.ViewContract,
-	localizerView localizer.ViewContract,
-	settingRepository setting.RepositoryContract,
+	convertorRepository convertor.RepositoryContract,
 	localizerService localizer.ServiceContract,
 ) *ConvertorHandler {
 	return &ConvertorHandler{
-		convertorService:  convertorService,
-		convertorView:     convertorView,
-		settingView:       settingView,
-		localizerView:     localizerView,
-		settingRepository: settingRepository,
-		localizerService:  localizerService,
+		convertorService:    convertorService,
+		convertorView:       convertorView,
+		convertorRepository: convertorRepository,
+		localizerService:    localizerService,
 	}
 }
 
-func (h ConvertorHandler) LanguageSelection() {
-	h.localizerView.LanguageSelection(func(lang localizer.Lang) {
-		h.GetConvertor()
-	})
-}
-
-func (h ConvertorHandler) GetConvertor() {
+func (h ConvertorHandler) MainConvertor() {
 	if h.checkingFFPathUtilities() == true {
 		h.convertorView.Main(h.runConvert)
 		return
 	}
-	h.settingView.SelectFFPath(h.saveSettingFFPath)
+	h.convertorView.SelectFFPath("", "", h.saveSettingFFPath, nil, h.downloadFFmpeg)
+}
+
+func (h ConvertorHandler) FfPathSelection() {
+	ffmpeg, _ := h.convertorRepository.GetPathFfmpeg()
+	ffprobe, _ := h.convertorRepository.GetPathFfprobe()
+	h.convertorView.SelectFFPath(ffmpeg, ffprobe, h.saveSettingFFPath, h.MainConvertor, h.downloadFFmpeg)
+}
+
+func (h ConvertorHandler) GetFfmpegVersion() (string, error) {
+	return h.convertorService.GetFFmpegVesrion()
+}
+
+func (h ConvertorHandler) GetFfprobeVersion() (string, error) {
+	return h.convertorService.GetFFprobeVersion()
 }
 
 func (h ConvertorHandler) runConvert(setting convertor.HandleConvertSetting, progressbar *widget.ProgressBar) error {
@@ -92,10 +100,8 @@ func (h ConvertorHandler) checkingFFPathUtilities() bool {
 		if ffprobeChecking == false {
 			continue
 		}
-		ffmpegEntity := setting.Setting{Code: "ffmpeg", Value: item.FFmpeg}
-		_, _ = h.settingRepository.Create(ffmpegEntity)
-		ffprobeEntity := setting.Setting{Code: "ffprobe", Value: item.FFprobe}
-		_, _ = h.settingRepository.Create(ffprobeEntity)
+		_, _ = h.convertorRepository.SavePathFfmpeg(item.FFmpeg)
+		_, _ = h.convertorRepository.SavePathFfprobe(item.FFprobe)
 		return true
 	}
 
@@ -119,12 +125,10 @@ func (h ConvertorHandler) saveSettingFFPath(ffmpegPath string, ffprobePath strin
 		return errors.New(errorText)
 	}
 
-	ffmpegEntity := setting.Setting{Code: "ffmpeg", Value: ffmpegPath}
-	_, _ = h.settingRepository.Create(ffmpegEntity)
-	ffprobeEntity := setting.Setting{Code: "ffprobe", Value: ffprobePath}
-	_, _ = h.settingRepository.Create(ffprobeEntity)
+	_, _ = h.convertorRepository.SavePathFfmpeg(ffmpegPath)
+	_, _ = h.convertorRepository.SavePathFfprobe(ffprobePath)
 
-	h.GetConvertor()
+	h.MainConvertor()
 
 	return nil
 }
@@ -143,15 +147,15 @@ func (h ConvertorHandler) checkingFFPath() bool {
 	return true
 }
 
-type progress struct {
+type Progress struct {
 	totalDuration    float64
 	progressbar      *widget.ProgressBar
 	protocol         string
 	localizerService localizer.ServiceContract
 }
 
-func NewProgress(totalDuration float64, progressbar *widget.ProgressBar, localizerService localizer.ServiceContract) progress {
-	return progress{
+func NewProgress(totalDuration float64, progressbar *widget.ProgressBar, localizerService localizer.ServiceContract) Progress {
+	return Progress{
 		totalDuration:    totalDuration,
 		progressbar:      progressbar,
 		protocol:         "pipe:",
@@ -159,11 +163,11 @@ func NewProgress(totalDuration float64, progressbar *widget.ProgressBar, localiz
 	}
 }
 
-func (p progress) GetProtocole() string {
+func (p Progress) GetProtocole() string {
 	return p.protocol
 }
 
-func (p progress) Run(stdOut io.ReadCloser, stdErr io.ReadCloser) error {
+func (p Progress) Run(stdOut io.ReadCloser, stdErr io.ReadCloser) error {
 	isProcessCompleted := false
 	var errorText string
 

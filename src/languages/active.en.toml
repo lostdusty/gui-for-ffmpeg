@@ -1,6 +1,34 @@
+[AlsoUsedProgram]
+hash = "sha1-a72be72e7808bb8a0144ed7a93acb29c568b1ed4"
+other = "The program also uses:"
+
+[about]
+hash = "sha1-3da0b9ef719fd707f443ac00404447f29445976f"
+other = "About"
+
+[aboutText]
+hash = "sha1-8bd565814118ba8b90c40eb5b62acf8d2676e7d6"
+other = "A simple interface for the FFmpeg console utility. \nBut I am not the author of the FFmpeg utility itself."
+
+[buttonDownloadFFmpeg]
+hash = "sha1-c223c2e15171156192bc3146aee91e6094bb475b"
+other = "Download FFmpeg automatically"
+
 [buttonForSelectedDirTitle]
 hash = "sha1-52b13f1b13e82d22e8c4102332db5d4ec551247b"
 other = "Folder where it will be saved:"
+
+[cancel]
+hash = "sha1-0ec753be8df955a117404fb634b01b45eb386e2a"
+other = "Cancel"
+
+[changeFFPath]
+hash = "sha1-46793a2844600d0eb19fa3540fb9564ee5705491"
+other = "FFmpeg and FFprobe"
+
+[changeLanguage]
+hash = "sha1-8b276eaf378d485c769fb3d5dcc06dfc25b0c01b"
+other = "Change language"
 
 [checkboxOverwriteOutputFilesTitle]
 hash = "sha1-5860124bb781e7ef680f573fa93977e96328d4e7"
@@ -18,6 +46,18 @@ other = "Convert"
 hash = "sha1-4d972809e4c7f9c9ff2c110a126bbc183c9429ce"
 other = "Converter video files to mp4"
 
+[download]
+hash = "sha1-fe8f79f29da457de2f6bc9531de6e536e0c426ad"
+other = "Download"
+
+[downloadFFmpegFromSite]
+hash = "sha1-0889c95aa3a8659d8d903b4dab7097699c4d8aa4"
+other = "Will be downloaded from the site:"
+
+[downloadRun]
+hash = "sha1-55f87f114628fa2d5d8e67d1e1cda22c0e4f9271"
+other = "Downloading..."
+
 [error]
 hash = "sha1-a7df8f8b5d754f226ac4cb320577fe692b33e483"
 other = "An error has occurred!"
@@ -34,17 +74,41 @@ other = "could not create file 'database' in folder 'data'"
 hash = "sha1-ccf0b95c0d1b392dc215258d917eb4e5d0b88ed0"
 other = "this is not FFmpeg"
 
+[errorFFmpegVersion]
+hash = "sha1-9a4148d42186b6b32cf83bef726e23022c53283f"
+other = "Could not determine FFmpeg version"
+
 [errorFFprobe]
 hash = "sha1-86d1b0b4c4ccd6a4f71e758fc67ce11aff4ba9b8"
 other = "this is not FFprobe"
+
+[errorFFprobeVersion]
+hash = "sha1-da7b37d7df3fafbd153665b13888413d52b24c17"
+other = "Failed to determine FFprobe version"
 
 [errorSelectedFolderSave]
 hash = "sha1-83da899677cdc90e4344e3b94ee03c46b51bee4c"
 other = "You haven't selected a folder to save!"
 
+[exit]
+hash = "sha1-c42457057d1ab7950cea00719cbe0b078891775f"
+other = "Exit"
+
+[ffmpegLGPL]
+hash = "sha1-d395b16cc8f8eab98a8a970307c5b010ba22dde6"
+other = "This software uses libraries from the **FFmpeg** project under the **[LGPLv2.1](http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html)**."
+
+[ffmpegTrademark]
+hash = "sha1-45f772b2eca5098cd6d31f2d1dc6edec1987a617"
+other = "**FFmpeg** is a trademark of **[Fabrice Bellard](http://bellard.org/)**, originator of the **[FFmpeg](https://ffmpeg.org/about.html)** project."
+
 [fileVideoForConversionTitle]
 hash = "sha1-5e727d4a2ff3f21080e51e81641595b2e668f3be"
 other = "File for conversion:"
+
+[help]
+hash = "sha1-6a45cef900c668effcb2ab10da05855c1fd10f6f"
+other = "Help"
 
 [languageSelectionFormHead]
 hash = "sha1-0ff5fa82cf684112660128cba1711297acf11003"
@@ -54,13 +118,29 @@ other = "Switch language"
 hash = "sha1-daf1108fc10d3b1a908288d611f749b3cc651e4b"
 other = "Choose language"
 
+[licenseLink]
+hash = "sha1-ea18ab849f0eea030d770da82c2a6b3484a7bd13"
+other = "License information"
+
+[licenseLinkOther]
+hash = "sha1-359fff328717c05104e51a2d29f05bf1875d26b7"
+other = "Licenses from other products used in the program"
+
 [pathToFfmpeg]
-hash = "sha1-2eba439f365640ff77e0ed6a7486fcb662573850"
-other = "Path to ffmpeg:"
+hash = "sha1-fafc50f1db0f720fe83a96cd70a9e1ad824e96b6"
+other = "Path to FFmpeg:"
 
 [pathToFfprobe]
-hash = "sha1-02ad53337801906f8ebfee4616100dd9f43eabd7"
-other = "Path to ffprobe:"
+hash = "sha1-b872edc9633a2e81ef678dc46fe46a7e91732024"
+other = "Path to FFprobe:"
+
+[programmLink]
+hash = "sha1-18f9a3fad6aacefe1b05eed23122800b391ff5ca"
+other = "Project website"
+
+[programmVersion]
+hash = "sha1-fa2e4994a301bb24bc2a8fa166e5486ea95a7475"
+other = "**Program version:** {{.Version}}"
 
 [save]
 hash = "sha1-4864057d626a868fa60f999bed3191d61d045ddc"
@@ -70,6 +150,18 @@ other = "Save"
 hash = "sha1-95581446a28d968ff1a027c623159a7eb08654cf"
 other = "Specify the path to FFmpeg and FFprobe"
 
+[settings]
+hash = "sha1-7f17c7c62a7fd8d1a508481f4778688927734c2f"
+other = "Settings"
+
+[testFF]
+hash = "sha1-f5b8ed88e9609963035d2235be0a79bbec619976"
+other = "Checking FFmpeg for serviceability..."
+
 [titleDownloadLink]
 hash = "sha1-92df86371f6c3a06ca1e4754f113142776a32d49"
 other = "You can download it from here"
+
+[unzipRun]
+hash = "sha1-c554dad13026668a1f6adf3171837c5d51bbac36"
+other = "Unpacked..."

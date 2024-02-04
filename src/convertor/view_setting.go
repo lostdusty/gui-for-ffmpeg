@@ -1,41 +1,30 @@
-package setting
+package convertor
 
 import (
-	"ffmpegGui/helper"
-	"ffmpegGui/localizer"
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/widget"
+	"git.kor-elf.net/kor-elf/gui-for-ffmpeg/helper"
 	"github.com/nicksnyder/go-i18n/v2/i18n"
 	"image/color"
 	"net/url"
 )
 
-type ViewContract interface {
-	SelectFFPath(func(ffmpegPath string, ffprobePath string) error)
-}
-
-type View struct {
-	w                fyne.Window
-	localizerService localizer.ServiceContract
-}
-
-func NewView(w fyne.Window, localizerService localizer.ServiceContract) *View {
-	return &View{
-		w:                w,
-		localizerService: localizerService,
-	}
-}
-
-func (v View) SelectFFPath(save func(ffmpegPath string, ffprobePath string) error) {
-	errorMessage := canvas.NewText("", color.RGBA{255, 0, 0, 255})
+func (v View) SelectFFPath(
+	currentPathFfmpeg string,
+	currentPathFfprobe string,
+	save func(ffmpegPath string, ffprobePath string) error,
+	cancel func(),
+	donwloadFFmpeg func(progressBar *widget.ProgressBar, progressMessage *canvas.Text) error,
+) {
+	errorMessage := canvas.NewText("", color.RGBA{R: 255, G: 0, B: 0, A: 255})
 	errorMessage.TextSize = 16
 	errorMessage.TextStyle = fyne.TextStyle{Bold: true}
 
-	ffmpegPath, buttonFFmpeg, buttonFFmpegMessage := v.getButtonSelectFile()
-	ffprobePath, buttonFFprobe, buttonFFprobeMessage := v.getButtonSelectFile()
+	ffmpegPath, buttonFFmpeg, buttonFFmpegMessage := v.getButtonSelectFile(currentPathFfmpeg)
+	ffprobePath, buttonFFprobe, buttonFFprobeMessage := v.getButtonSelectFile(currentPathFfprobe)
 
 	link := widget.NewHyperlink("https://ffmpeg.org/download.html", &url.URL{
 		Scheme: "https",
@@ -77,23 +66,32 @@ func (v View) SelectFFPath(save func(ffmpegPath string, ffprobePath string) erro
 			MessageID: "save",
 		}),
 		OnSubmit: func() {
-			err := save(string(*ffmpegPath), string(*ffprobePath))
+			err := save(*ffmpegPath, *ffprobePath)
 			if err != nil {
 				errorMessage.Text = err.Error()
 			}
 		},
 	}
+	if cancel != nil {
+		form.OnCancel = cancel
+		form.CancelText = v.localizerService.GetMessage(&i18n.LocalizeConfig{
+			MessageID: "cancel",
+		})
+	}
 	selectFFPathTitle := v.localizerService.GetMessage(&i18n.LocalizeConfig{
 		MessageID: "selectFFPathTitle",
 	})
-	v.w.SetContent(widget.NewCard(selectFFPathTitle, "", container.NewVBox(form)))
+
+	v.w.SetContent(widget.NewCard(selectFFPathTitle, "", container.NewVBox(
+		form,
+		v.blockDownloadFFmpeg(donwloadFFmpeg),
+	)))
 }
 
-func (v View) getButtonSelectFile() (filePath *string, button *widget.Button, buttonMessage *canvas.Text) {
-	path := ""
+func (v View) getButtonSelectFile(path string) (filePath *string, button *widget.Button, buttonMessage *canvas.Text) {
 	filePath = &path
 
-	buttonMessage = canvas.NewText("", color.RGBA{255, 0, 0, 255})
+	buttonMessage = canvas.NewText(path, color.RGBA{R: 49, G: 127, B: 114, A: 255})
 	buttonMessage.TextSize = 16
 	buttonMessage.TextStyle = fyne.TextStyle{Bold: true}
 
@@ -123,14 +121,4 @@ func (v View) getButtonSelectFile() (filePath *string, button *widget.Button, bu
 	})
 
 	return
-}
-
-func setStringErrorStyle(text *canvas.Text) {
-	text.Color = color.RGBA{255, 0, 0, 255}
-	text.Refresh()
-}
-
-func setStringSuccessStyle(text *canvas.Text) {
-	text.Color = color.RGBA{49, 127, 114, 255}
-	text.Refresh()
 }

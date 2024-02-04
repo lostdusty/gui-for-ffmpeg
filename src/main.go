@@ -2,16 +2,17 @@ package main
 
 import (
 	"errors"
-	"ffmpegGui/convertor"
-	error2 "ffmpegGui/error"
-	"ffmpegGui/handler"
-	"ffmpegGui/localizer"
-	"ffmpegGui/migration"
-	"ffmpegGui/setting"
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/widget"
+	"git.kor-elf.net/kor-elf/gui-for-ffmpeg/convertor"
+	error2 "git.kor-elf.net/kor-elf/gui-for-ffmpeg/error"
+	"git.kor-elf.net/kor-elf/gui-for-ffmpeg/handler"
+	"git.kor-elf.net/kor-elf/gui-for-ffmpeg/localizer"
+	"git.kor-elf.net/kor-elf/gui-for-ffmpeg/menu"
+	"git.kor-elf.net/kor-elf/gui-for-ffmpeg/migration"
+	"git.kor-elf.net/kor-elf/gui-for-ffmpeg/setting"
 	_ "github.com/mattn/go-sqlite3"
 	"golang.org/x/text/language"
 	"gorm.io/driver/sqlite"
@@ -19,7 +20,7 @@ import (
 	"os"
 )
 
-//const appVersion string = "0.2.0"
+const appVersion string = "0.3.0"
 
 func main() {
 	a := app.New()
@@ -27,7 +28,7 @@ func main() {
 	if err == nil {
 		a.SetIcon(iconResource)
 	}
-	w := a.NewWindow("GUI FFMpeg!")
+	w := a.NewWindow("GUI for FFmpeg")
 	w.Resize(fyne.Size{Width: 800, Height: 600})
 	w.CenterOnScreen()
 
@@ -62,13 +63,14 @@ func main() {
 	}
 
 	settingRepository := setting.NewRepository(db)
-	pathFFmpeg, err := settingRepository.GetValue("ffmpeg")
+	convertorRepository := convertor.NewRepository(settingRepository)
+	pathFFmpeg, err := convertorRepository.GetPathFfmpeg()
 	if err != nil && errors.Is(err, gorm.ErrRecordNotFound) == false {
 		errorView.PanicError(err)
 		w.ShowAndRun()
 		return
 	}
-	pathFFprobe, err := settingRepository.GetValue("ffprobe")
+	pathFFprobe, err := convertorRepository.GetPathFfprobe()
 	if err != nil && errors.Is(err, gorm.ErrRecordNotFound) == false {
 		errorView.PanicError(err)
 		w.ShowAndRun()
@@ -79,12 +81,18 @@ func main() {
 
 	localizerView := localizer.NewView(w, localizerService)
 	convertorView := convertor.NewView(w, localizerService)
-	settingView := setting.NewView(w, localizerService)
 	convertorService := convertor.NewService(ffPathUtilities)
 	defer appCloseWithConvert(convertorService)
-	mainHandler := handler.NewConvertorHandler(convertorService, convertorView, settingView, localizerView, settingRepository, localizerService)
+	convertorHandler := handler.NewConvertorHandler(convertorService, convertorView, convertorRepository, localizerService)
 
-	mainHandler.LanguageSelection()
+	localizerRepository := localizer.NewRepository(settingRepository)
+	menuView := menu.NewView(w, a, appVersion, localizerService)
+	mainMenu := handler.NewMenuHandler(convertorHandler, menuView, localizerService, localizerView, localizerRepository)
+
+	mainHandler := handler.NewMainHandler(convertorHandler, mainMenu, localizerRepository, localizerService)
+	mainHandler.Start()
+
+	w.SetMainMenu(mainMenu.GetMainMenu())
 
 	w.ShowAndRun()
 }
