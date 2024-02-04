@@ -22,6 +22,7 @@ type ViewContract interface {
 		ffprobePath string,
 		save func(ffmpegPath string, ffprobePath string) error,
 		cancel func(),
+		donwloadFFmpeg func(progressBar *widget.ProgressBar, progressMessage *canvas.Text) error,
 	)
 }
 

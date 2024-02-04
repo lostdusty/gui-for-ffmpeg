@@ -1,7 +1,3 @@
-[AlsoUsedProgram]
-hash = "sha1-a72be72e7808bb8a0144ed7a93acb29c568b1ed4"
-other = "Бағдарлама сонымен қатар пайдаланады:"
-
-[licenseLinkOther]
-hash = "sha1-359fff328717c05104e51a2d29f05bf1875d26b7"
-other = "Бағдарламада пайдаланылатын басқа өнімдердің лицензиялары"
+[testFF]
+hash = "sha1-f5b8ed88e9609963035d2235be0a79bbec619976"
+other = "FFmpeg функционалдығы тексерілуде..."

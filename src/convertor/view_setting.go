@@ -17,6 +17,7 @@ func (v View) SelectFFPath(
 	currentPathFfprobe string,
 	save func(ffmpegPath string, ffprobePath string) error,
 	cancel func(),
+	donwloadFFmpeg func(progressBar *widget.ProgressBar, progressMessage *canvas.Text) error,
 ) {
 	errorMessage := canvas.NewText("", color.RGBA{R: 255, G: 0, B: 0, A: 255})
 	errorMessage.TextSize = 16
@@ -80,7 +81,11 @@ func (v View) SelectFFPath(
 	selectFFPathTitle := v.localizerService.GetMessage(&i18n.LocalizeConfig{
 		MessageID: "selectFFPathTitle",
 	})
-	v.w.SetContent(widget.NewCard(selectFFPathTitle, "", container.NewVBox(form)))
+
+	v.w.SetContent(widget.NewCard(selectFFPathTitle, "", container.NewVBox(
+		form,
+		v.blockDownloadFFmpeg(donwloadFFmpeg),
+	)))
 }
 
 func (v View) getButtonSelectFile(path string) (filePath *string, button *widget.Button, buttonMessage *canvas.Text) {

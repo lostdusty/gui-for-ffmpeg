@@ -10,6 +10,10 @@ other = "Бағдарлама туралы"
 hash = "sha1-8bd565814118ba8b90c40eb5b62acf8d2676e7d6"
 other = "FFmpeg консоль утилитасы үшін қарапайым интерфейс. \nБірақ мен FFmpeg утилитасының авторы емеспін."
 
+[buttonDownloadFFmpeg]
+hash = "sha1-c223c2e15171156192bc3146aee91e6094bb475b"
+other = "FFmpeg автоматты түрде жүктеп алыңыз"
+
 [buttonForSelectedDirTitle]
 hash = "sha1-52b13f1b13e82d22e8c4102332db5d4ec551247b"
 other = "Файлды сақтауға арналған каталог:"
@@ -41,6 +45,18 @@ other = "Файлды түрлендіру"
 [converterVideoFilesTitle]
 hash = "sha1-4d972809e4c7f9c9ff2c110a126bbc183c9429ce"
 other = "Бейне файлдарын mp4 форматына түрлендіру"
+
+[download]
+hash = "sha1-fe8f79f29da457de2f6bc9531de6e536e0c426ad"
+other = "Жүктеп алу"
+
+[downloadFFmpegFromSite]
+hash = "sha1-0889c95aa3a8659d8d903b4dab7097699c4d8aa4"
+other = "Сайттан жүктеледі:"
+
+[downloadRun]
+hash = "sha1-55f87f114628fa2d5d8e67d1e1cda22c0e4f9271"
+other = "Жүктеп алынуда..."
 
 [error]
 hash = "sha1-a7df8f8b5d754f226ac4cb320577fe692b33e483"
@@ -138,6 +154,14 @@ other = "FFmpeg және FFprobe жолын көрсетіңіз"
 hash = "sha1-7f17c7c62a7fd8d1a508481f4778688927734c2f"
 other = "Параметрлер"
 
+[testFF]
+hash = "sha1-f5b8ed88e9609963035d2235be0a79bbec619976"
+other = "FFmpeg функционалдығы тексерілуде..."
+
 [titleDownloadLink]
 hash = "sha1-92df86371f6c3a06ca1e4754f113142776a32d49"
 other = "Сіз оны осы жерден жүктей аласыз"
+
+[unzipRun]
+hash = "sha1-c554dad13026668a1f6adf3171837c5d51bbac36"
+other = "Орамнан шығарылуда..."

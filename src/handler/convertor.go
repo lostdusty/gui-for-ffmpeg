@@ -47,13 +47,13 @@ func (h ConvertorHandler) MainConvertor() {
 		h.convertorView.Main(h.runConvert)
 		return
 	}
-	h.convertorView.SelectFFPath("", "", h.saveSettingFFPath, nil)
+	h.convertorView.SelectFFPath("", "", h.saveSettingFFPath, nil, h.downloadFFmpeg)
 }
 
 func (h ConvertorHandler) FfPathSelection() {
 	ffmpeg, _ := h.convertorRepository.GetPathFfmpeg()
 	ffprobe, _ := h.convertorRepository.GetPathFfprobe()
-	h.convertorView.SelectFFPath(ffmpeg, ffprobe, h.saveSettingFFPath, h.MainConvertor)
+	h.convertorView.SelectFFPath(ffmpeg, ffprobe, h.saveSettingFFPath, h.MainConvertor, h.downloadFFmpeg)
 }
 
 func (h ConvertorHandler) GetFfmpegVersion() (string, error) {
