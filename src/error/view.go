@@ -4,7 +4,7 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/widget"
-	"git.kor-elf.net/kor-elf/gui-for-ffmpeg/localizer"
+	"git.kor-elf.net/kor-elf/gui-for-ffmpeg/src/localizer"
 	"github.com/nicksnyder/go-i18n/v2/i18n"
 )
 

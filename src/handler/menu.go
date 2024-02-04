@@ -2,8 +2,8 @@ package handler
 
 import (
 	"fyne.io/fyne/v2"
-	"git.kor-elf.net/kor-elf/gui-for-ffmpeg/localizer"
-	"git.kor-elf.net/kor-elf/gui-for-ffmpeg/menu"
+	"git.kor-elf.net/kor-elf/gui-for-ffmpeg/src/localizer"
+	"git.kor-elf.net/kor-elf/gui-for-ffmpeg/src/menu"
 	"github.com/nicksnyder/go-i18n/v2/i18n"
 )
 

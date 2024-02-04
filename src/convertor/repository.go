@@ -1,7 +1,7 @@
 package convertor
 
 import (
-	"git.kor-elf.net/kor-elf/gui-for-ffmpeg/setting"
+	"git.kor-elf.net/kor-elf/gui-for-ffmpeg/src/setting"
 )
 
 type RepositoryContract interface {
