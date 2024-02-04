@@ -3,6 +3,8 @@
 <p>Простенький интерфейс для консольной утилиты FFmpeg. Но я <strong>не являюсь</strong> автором самой утилиты <strong>FFmpeg</strong>.</p>
 <p><strong>FFmpeg</strong> — торговая марка <strong><a href="http://bellard.org/" target="_blank">Fabrice Bellard</a></strong>, создателя проекта <strong><a href="https://ffmpeg.org/about.html" target="_blank">FFmpeg</a></strong>.</p>
 
+<p>Программное обеспечение является MIT (см. <a href="https://git.kor-elf.net/kor-elf/gui-for-ffmpeg/src/branch/main/LICENSE">LICENSE</a>) и использует сторонние библиотеки, которые распространяются на их собственных условиях (см. <a href="https://git.kor-elf.net/kor-elf/gui-for-ffmpeg/src/branch/main/LICENSE-3RD-PARTY.txt">LICENSE-3RD-PARTY.txt</a>).</p>
+
 <img src="images/screenshot-gui-for-ffmpeg.png">
 
 <p>Скачать скомпилированные готовые версии можно тут: <a href="https://git.kor-elf.net/kor-elf/gui-for-ffmpeg/releases">https://git.kor-elf.net/kor-elf/gui-for-ffmpeg/releases</a>.</p>
@@ -27,6 +29,7 @@
    * src/data
    * src/languages
    * LICENSE
+   * LICENSE-3RD-PARTY.txt
 <p><strong>Структура должна получиться такая:</strong></p>
 <img src="images/screenshot-folder-structure.png">
 

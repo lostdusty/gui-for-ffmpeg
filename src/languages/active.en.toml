@@ -1,3 +1,7 @@
+[AlsoUsedProgram]
+hash = "sha1-a72be72e7808bb8a0144ed7a93acb29c568b1ed4"
+other = "The program also uses:"
+
 [about]
 hash = "sha1-3da0b9ef719fd707f443ac00404447f29445976f"
 other = "About"
@@ -101,6 +105,10 @@ other = "Choose language"
 [licenseLink]
 hash = "sha1-ea18ab849f0eea030d770da82c2a6b3484a7bd13"
 other = "License information"
+
+[licenseLinkOther]
+hash = "sha1-359fff328717c05104e51a2d29f05bf1875d26b7"
+other = "Licenses from other products used in the program"
 
 [pathToFfmpeg]
 hash = "sha1-fafc50f1db0f720fe83a96cd70a9e1ad824e96b6"
