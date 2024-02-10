@@ -5,11 +5,13 @@ import (
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/dialog"
+	"fyne.io/fyne/v2/storage"
 	"fyne.io/fyne/v2/widget"
 	"git.kor-elf.net/kor-elf/gui-for-ffmpeg/src/helper"
 	"github.com/nicksnyder/go-i18n/v2/i18n"
 	"image/color"
 	"net/url"
+	"path/filepath"
 )
 
 func (v View) SelectFFPath(
@@ -47,7 +49,7 @@ func (v View) SelectFFPath(
 				Widget: buttonFFmpeg,
 			},
 			{
-				Widget: buttonFFmpegMessage,
+				Widget: container.NewHScroll(buttonFFmpegMessage),
 			},
 			{
 				Text: v.localizerService.GetMessage(&i18n.LocalizeConfig{
@@ -56,7 +58,7 @@ func (v View) SelectFFPath(
 				Widget: buttonFFprobe,
 			},
 			{
-				Widget: buttonFFprobeMessage,
+				Widget: container.NewHScroll(buttonFFprobeMessage),
 			},
 			{
 				Widget: errorMessage,
@@ -99,6 +101,12 @@ func (v View) getButtonSelectFile(path string) (filePath *string, button *widget
 		MessageID: "choose",
 	})
 
+	var locationURI fyne.ListableURI
+	if len(path) > 0 {
+		listableURI := storage.NewFileURI(filepath.Dir(path))
+		locationURI, _ = storage.ListerForURI(listableURI)
+	}
+
 	button = widget.NewButton(buttonTitle, func() {
 		fileDialog := dialog.NewFileOpen(
 			func(r fyne.URIReadCloser, err error) {
@@ -115,9 +123,15 @@ func (v View) getButtonSelectFile(path string) (filePath *string, button *widget
 
 				buttonMessage.Text = r.URI().Path()
 				setStringSuccessStyle(buttonMessage)
+
+				listableURI := storage.NewFileURI(filepath.Dir(r.URI().Path()))
+				locationURI, _ = storage.ListerForURI(listableURI)
 			}, v.w)
 		helper.FileDialogResize(fileDialog, v.w)
 		fileDialog.Show()
+		if locationURI != nil {
+			fileDialog.SetLocation(locationURI)
+		}
 	})
 
 	return
