@@ -178,19 +178,30 @@ func (p Progress) Run(stdOut io.ReadCloser, stdErr io.ReadCloser) error {
 	progress := 0.0
 
 	go func() {
-		scannerErr := bufio.NewScanner(stdErr)
-		for scannerErr.Scan() {
-			errorText = scannerErr.Text()
-		}
-		if err := scannerErr.Err(); err != nil {
-			errorText = err.Error()
+		scannerErr := bufio.NewReader(stdErr)
+		for {
+			line, _, err := scannerErr.ReadLine()
+			if err != nil {
+				if err == io.EOF {
+					break
+				}
+				continue
+			}
+			data := strings.TrimSpace(string(line))
+			errorText = data
 		}
 	}()
 
-	scannerOut := bufio.NewScanner(stdOut)
-	for scannerOut.Scan() {
-		data := scannerOut.Text()
-
+	scannerOut := bufio.NewReader(stdOut)
+	for {
+		line, _, err := scannerOut.ReadLine()
+		if err != nil {
+			if err == io.EOF {
+				break
+			}
+			continue
+		}
+		data := strings.TrimSpace(string(line))
 		if strings.Contains(data, "progress=end") {
 			p.progressbar.Value = p.totalDuration
 			p.progressbar.Refresh()
