@@ -20,7 +20,7 @@ import (
 	"os"
 )
 
-const appVersion string = "0.3.0"
+const appVersion string = "0.3.1"
 
 func main() {
 	a := app.New()
