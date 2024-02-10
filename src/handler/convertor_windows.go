@@ -8,7 +8,7 @@ import (
 	"errors"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/widget"
-	"git.kor-elf.net/kor-elf/gui-for-ffmpeg/convertor"
+	"git.kor-elf.net/kor-elf/gui-for-ffmpeg/src/convertor"
 	"github.com/nicksnyder/go-i18n/v2/i18n"
 	"io"
 	"net/http"
