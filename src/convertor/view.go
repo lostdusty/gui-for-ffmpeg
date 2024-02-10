@@ -6,11 +6,13 @@ import (
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/dialog"
+	"fyne.io/fyne/v2/storage"
 	"fyne.io/fyne/v2/widget"
 	"git.kor-elf.net/kor-elf/gui-for-ffmpeg/src/helper"
 	"git.kor-elf.net/kor-elf/gui-for-ffmpeg/src/localizer"
 	"github.com/nicksnyder/go-i18n/v2/i18n"
 	"image/color"
+	"path/filepath"
 )
 
 type ViewContract interface {
@@ -78,14 +80,14 @@ func (v View) Main(
 			Widget: fileVideoForConversion,
 		},
 		{
-			Widget: fileVideoForConversionMessage,
+			Widget: container.NewHScroll(fileVideoForConversionMessage),
 		},
 		{
 			Text:   v.localizerService.GetMessage(&i18n.LocalizeConfig{MessageID: "buttonForSelectedDirTitle"}),
 			Widget: buttonForSelectedDir,
 		},
 		{
-			Widget: buttonForSelectedDirMessage,
+			Widget: container.NewHScroll(buttonForSelectedDirMessage),
 		},
 		{
 			Widget: checkboxOverwriteOutputFiles,
@@ -147,6 +149,8 @@ func (v View) getButtonFileVideoForConversion(form *widget.Form, progress *widge
 		MessageID: "choose",
 	})
 
+	var locationURI fyne.ListableURI
+
 	button := widget.NewButton(buttonTitle, func() {
 		fileDialog := dialog.NewFileOpen(
 			func(r fyne.URIReadCloser, err error) {
@@ -170,9 +174,15 @@ func (v View) getButtonFileVideoForConversion(form *widget.Form, progress *widge
 				progress.Value = 0
 				progress.Refresh()
 				conversionMessage.Text = ""
+
+				listableURI := storage.NewFileURI(filepath.Dir(r.URI().Path()))
+				locationURI, err = storage.ListerForURI(listableURI)
 			}, v.w)
 		helper.FileDialogResize(fileDialog, v.w)
 		fileDialog.Show()
+		if locationURI != nil {
+			fileDialog.SetLocation(locationURI)
+		}
 	})
 
 	return button, fileVideoForConversionMessage, fileInput
@@ -190,6 +200,8 @@ func (v View) getButtonForSelectingDirectoryForSaving() (button *widget.Button, 
 		MessageID: "choose",
 	})
 
+	var locationURI fyne.ListableURI
+
 	button = widget.NewButton(buttonTitle, func() {
 		fileDialog := dialog.NewFolderOpen(
 			func(r fyne.ListableURI, err error) {
@@ -206,9 +218,14 @@ func (v View) getButtonForSelectingDirectoryForSaving() (button *widget.Button, 
 
 				buttonMessage.Text = r.Path()
 				setStringSuccessStyle(buttonMessage)
+				locationURI, _ = storage.ListerForURI(r)
+
 			}, v.w)
 		helper.FileDialogResize(fileDialog, v.w)
 		fileDialog.Show()
+		if locationURI != nil {
+			fileDialog.SetLocation(locationURI)
+		}
 	})
 
 	return
