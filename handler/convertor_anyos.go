@@ -6,7 +6,7 @@ package handler
 import (
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/widget"
-	"git.kor-elf.net/kor-elf/gui-for-ffmpeg/src/convertor"
+	"git.kor-elf.net/kor-elf/gui-for-ffmpeg/convertor"
 )
 
 func getPathsToFF() []convertor.FFPathUtilities {

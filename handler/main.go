@@ -1,7 +1,7 @@
 package handler
 
 import (
-	"git.kor-elf.net/kor-elf/gui-for-ffmpeg/src/localizer"
+	"git.kor-elf.net/kor-elf/gui-for-ffmpeg/localizer"
 )
 
 type MainHandler struct {

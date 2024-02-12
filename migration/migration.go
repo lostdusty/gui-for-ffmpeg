@@ -1,7 +1,7 @@
 package migration
 
 import (
-	"git.kor-elf.net/kor-elf/gui-for-ffmpeg/src/setting"
+	"git.kor-elf.net/kor-elf/gui-for-ffmpeg/setting"
 	"gorm.io/gorm"
 )
 

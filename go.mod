@@ -1,4 +1,4 @@
-module git.kor-elf.net/kor-elf/gui-for-ffmpeg/src
+module git.kor-elf.net/kor-elf/gui-for-ffmpeg
 
 go 1.21
 
