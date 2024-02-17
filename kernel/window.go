@@ -4,6 +4,7 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/dialog"
 	"git.kor-elf.net/kor-elf/gui-for-ffmpeg/helper"
+	"time"
 )
 
 type WindowContract interface {
@@ -21,8 +22,13 @@ type Window struct {
 }
 
 func newWindow(w fyne.Window, layout LayoutContract) Window {
-	w.Resize(fyne.Size{Width: 799, Height: 599})
+	w.Resize(fyne.Size{Width: 1039, Height: 599})
 	w.CenterOnScreen()
+
+	go func() {
+		time.Sleep(time.Millisecond * 500)
+		w.Resize(fyne.Size{Width: 1040, Height: 600})
+	}()
 
 	return Window{
 		windowFyne: w,
