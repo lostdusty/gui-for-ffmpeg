@@ -26,8 +26,15 @@ func newWindow(w fyne.Window, layout LayoutContract) Window {
 	w.CenterOnScreen()
 
 	go func() {
+		/**
+		 * Bug fixed.
+		 * When starting the program, sometimes the window was displayed incorrectly.
+		 */
 		time.Sleep(time.Millisecond * 500)
-		w.Resize(fyne.Size{Width: 1040, Height: 600})
+		size := w.Canvas().Size()
+		size.Width += 1
+		size.Height += 1
+		w.Resize(size)
 	}()
 
 	return Window{
