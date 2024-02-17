@@ -18,7 +18,7 @@ import (
 	"os"
 )
 
-var app kernel.AppContract
+var application kernel.AppContract
 var ffPathUtilities *kernel.FFPathUtilities
 
 func init() {
@@ -41,7 +41,7 @@ func init() {
 	localizerService.AddListener(layoutLocalizerListener)
 
 	queue := kernel.NewQueueList()
-	app = kernel.NewApp(
+	application = kernel.NewApp(
 		appMetadata,
 		localizerService,
 		queue,
@@ -51,17 +51,17 @@ func init() {
 }
 
 func main() {
-	errorView := error2.NewView(app)
+	errorView := error2.NewView(application)
 	if canCreateFile("data/database") != true {
 		errorView.PanicErrorWriteDirectoryData()
-		app.GetWindow().ShowAndRun()
+		application.GetWindow().ShowAndRun()
 		return
 	}
 
 	db, err := gorm.Open(sqlite.Open("data/database"), &gorm.Config{})
 	if err != nil {
 		errorView.PanicError(err)
-		app.GetWindow().ShowAndRun()
+		application.GetWindow().ShowAndRun()
 		return
 	}
 
@@ -70,7 +70,7 @@ func main() {
 	err = migration.Run(db)
 	if err != nil {
 		errorView.PanicError(err)
-		app.GetWindow().ShowAndRun()
+		application.GetWindow().ShowAndRun()
 		return
 	}
 
@@ -79,7 +79,7 @@ func main() {
 	pathFFmpeg, err := convertorRepository.GetPathFfmpeg()
 	if err != nil && errors.Is(err, gorm.ErrRecordNotFound) == false {
 		errorView.PanicError(err)
-		app.GetWindow().ShowAndRun()
+		application.GetWindow().ShowAndRun()
 		return
 	}
 	ffPathUtilities.FFmpeg = pathFFmpeg
@@ -87,29 +87,29 @@ func main() {
 	pathFFprobe, err := convertorRepository.GetPathFfprobe()
 	if err != nil && errors.Is(err, gorm.ErrRecordNotFound) == false {
 		errorView.PanicError(err)
-		app.GetWindow().ShowAndRun()
+		application.GetWindow().ShowAndRun()
 		return
 	}
 	ffPathUtilities.FFprobe = pathFFprobe
 
-	app.RunConvertor()
-	defer app.AfterClosing()
+	application.RunConvertor()
+	defer application.AfterClosing()
 
-	localizerView := localizer.NewView(app)
-	convertorView := convertor.NewView(app)
-	convertorHandler := handler.NewConvertorHandler(app, convertorView, convertorRepository)
+	localizerView := localizer.NewView(application)
+	convertorView := convertor.NewView(application)
+	convertorHandler := handler.NewConvertorHandler(application, convertorView, convertorRepository)
 
 	localizerRepository := localizer.NewRepository(settingRepository)
-	menuView := menu.NewView(app)
+	menuView := menu.NewView(application)
 	localizerListener := handler.NewLocalizerListener()
-	app.GetLocalizerService().AddListener(localizerListener)
-	mainMenu := handler.NewMenuHandler(app, convertorHandler, menuView, localizerView, localizerRepository, localizerListener)
+	application.GetLocalizerService().AddListener(localizerListener)
+	mainMenu := handler.NewMenuHandler(application, convertorHandler, menuView, localizerView, localizerRepository, localizerListener)
 
-	mainHandler := handler.NewMainHandler(app, convertorHandler, mainMenu, localizerRepository)
+	mainHandler := handler.NewMainHandler(application, convertorHandler, mainMenu, localizerRepository)
 	mainHandler.Start()
 
-	app.GetWindow().SetMainMenu(mainMenu.GetMainMenu())
-	app.GetWindow().ShowAndRun()
+	application.GetWindow().SetMainMenu(mainMenu.GetMainMenu())
+	application.GetWindow().ShowAndRun()
 }
 
 func appCloseWithDb(db *gorm.DB) {
