@@ -5,11 +5,9 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
-	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/storage"
 	"fyne.io/fyne/v2/widget"
-	"git.kor-elf.net/kor-elf/gui-for-ffmpeg/helper"
-	"git.kor-elf.net/kor-elf/gui-for-ffmpeg/localizer"
+	"git.kor-elf.net/kor-elf/gui-for-ffmpeg/kernel"
 	"github.com/nicksnyder/go-i18n/v2/i18n"
 	"image/color"
 	"path/filepath"
@@ -17,7 +15,7 @@ import (
 
 type ViewContract interface {
 	Main(
-		runConvert func(setting HandleConvertSetting, progressbar *widget.ProgressBar) error,
+		runConvert func(setting HandleConvertSetting),
 	)
 	SelectFFPath(
 		ffmpegPath string,
@@ -29,12 +27,11 @@ type ViewContract interface {
 }
 
 type View struct {
-	w                fyne.Window
-	localizerService localizer.ServiceContract
+	app kernel.AppContract
 }
 
 type HandleConvertSetting struct {
-	VideoFileInput       *File
+	VideoFileInput       kernel.File
 	DirectoryForSave     string
 	OverwriteOutputFiles bool
 }
@@ -45,15 +42,14 @@ type enableFormConversionStruct struct {
 	form                   *widget.Form
 }
 
-func NewView(w fyne.Window, localizerService localizer.ServiceContract) *View {
+func NewView(app kernel.AppContract) *View {
 	return &View{
-		w:                w,
-		localizerService: localizerService,
+		app: app,
 	}
 }
 
 func (v View) Main(
-	runConvert func(setting HandleConvertSetting, progressbar *widget.ProgressBar) error,
+	runConvert func(setting HandleConvertSetting),
 ) {
 	form := &widget.Form{}
 
@@ -61,13 +57,11 @@ func (v View) Main(
 	conversionMessage.TextSize = 16
 	conversionMessage.TextStyle = fyne.TextStyle{Bold: true}
 
-	progress := widget.NewProgressBar()
-
-	fileVideoForConversion, fileVideoForConversionMessage, fileInput := v.getButtonFileVideoForConversion(form, progress, conversionMessage)
+	fileVideoForConversion, fileVideoForConversionMessage, fileInput := v.getButtonFileVideoForConversion(form, conversionMessage)
 	buttonForSelectedDir, buttonForSelectedDirMessage, pathToSaveDirectory := v.getButtonForSelectingDirectoryForSaving()
 
 	isOverwriteOutputFiles := false
-	checkboxOverwriteOutputFilesTitle := v.localizerService.GetMessage(&i18n.LocalizeConfig{
+	checkboxOverwriteOutputFilesTitle := v.app.GetLocalizerService().GetMessage(&i18n.LocalizeConfig{
 		MessageID: "checkboxOverwriteOutputFilesTitle",
 	})
 	checkboxOverwriteOutputFiles := widget.NewCheck(checkboxOverwriteOutputFilesTitle, func(b bool) {
@@ -76,14 +70,14 @@ func (v View) Main(
 
 	form.Items = []*widget.FormItem{
 		{
-			Text:   v.localizerService.GetMessage(&i18n.LocalizeConfig{MessageID: "fileVideoForConversionTitle"}),
+			Text:   v.app.GetLocalizerService().GetMessage(&i18n.LocalizeConfig{MessageID: "fileVideoForConversionTitle"}),
 			Widget: fileVideoForConversion,
 		},
 		{
 			Widget: container.NewHScroll(fileVideoForConversionMessage),
 		},
 		{
-			Text:   v.localizerService.GetMessage(&i18n.LocalizeConfig{MessageID: "buttonForSelectedDirTitle"}),
+			Text:   v.app.GetLocalizerService().GetMessage(&i18n.LocalizeConfig{MessageID: "buttonForSelectedDirTitle"}),
 			Widget: buttonForSelectedDir,
 		},
 		{
@@ -93,7 +87,7 @@ func (v View) Main(
 			Widget: checkboxOverwriteOutputFiles,
 		},
 	}
-	form.SubmitText = v.localizerService.GetMessage(&i18n.LocalizeConfig{
+	form.SubmitText = v.app.GetLocalizerService().GetMessage(&i18n.LocalizeConfig{
 		MessageID: "converterVideoFilesSubmitTitle",
 	})
 
@@ -105,7 +99,7 @@ func (v View) Main(
 
 	form.OnSubmit = func() {
 		if len(*pathToSaveDirectory) == 0 {
-			showConversionMessage(conversionMessage, errors.New(v.localizerService.GetMessage(&i18n.LocalizeConfig{
+			showConversionMessage(conversionMessage, errors.New(v.app.GetLocalizerService().GetMessage(&i18n.LocalizeConfig{
 				MessageID: "errorSelectedFolderSave",
 			})))
 			enableFormConversion(enableFormConversionStruct)
@@ -118,71 +112,61 @@ func (v View) Main(
 		form.Disable()
 
 		setting := HandleConvertSetting{
-			VideoFileInput:       fileInput,
+			VideoFileInput:       *fileInput,
 			DirectoryForSave:     *pathToSaveDirectory,
 			OverwriteOutputFiles: isOverwriteOutputFiles,
 		}
-		err := runConvert(setting, progress)
-		if err != nil {
-			showConversionMessage(conversionMessage, err)
-			enableFormConversion(enableFormConversionStruct)
-			return
-		}
+		runConvert(setting)
 		enableFormConversion(enableFormConversionStruct)
+
+		fileVideoForConversionMessage.Text = ""
+		form.Disable()
 	}
 
-	converterVideoFilesTitle := v.localizerService.GetMessage(&i18n.LocalizeConfig{
+	converterVideoFilesTitle := v.app.GetLocalizerService().GetMessage(&i18n.LocalizeConfig{
 		MessageID: "converterVideoFilesTitle",
 	})
-	v.w.SetContent(widget.NewCard(converterVideoFilesTitle, "", container.NewVBox(form, conversionMessage, progress)))
+	v.app.GetWindow().SetContent(widget.NewCard(converterVideoFilesTitle, "", container.NewVBox(form, conversionMessage)))
 	form.Disable()
 }
 
-func (v View) getButtonFileVideoForConversion(form *widget.Form, progress *widget.ProgressBar, conversionMessage *canvas.Text) (*widget.Button, *canvas.Text, *File) {
-	fileInput := &File{}
+func (v View) getButtonFileVideoForConversion(form *widget.Form, conversionMessage *canvas.Text) (*widget.Button, *canvas.Text, *kernel.File) {
+	fileInput := &kernel.File{}
 
 	fileVideoForConversionMessage := canvas.NewText("", color.RGBA{R: 255, G: 0, B: 0, A: 255})
 	fileVideoForConversionMessage.TextSize = 16
 	fileVideoForConversionMessage.TextStyle = fyne.TextStyle{Bold: true}
 
-	buttonTitle := v.localizerService.GetMessage(&i18n.LocalizeConfig{
+	buttonTitle := v.app.GetLocalizerService().GetMessage(&i18n.LocalizeConfig{
 		MessageID: "choose",
 	})
 
 	var locationURI fyne.ListableURI
 
 	button := widget.NewButton(buttonTitle, func() {
-		fileDialog := dialog.NewFileOpen(
-			func(r fyne.URIReadCloser, err error) {
-				if err != nil {
-					fileVideoForConversionMessage.Text = err.Error()
-					setStringErrorStyle(fileVideoForConversionMessage)
-					return
-				}
-				if r == nil {
-					return
-				}
+		v.app.GetWindow().NewFileOpen(func(r fyne.URIReadCloser, err error) {
+			if err != nil {
+				fileVideoForConversionMessage.Text = err.Error()
+				setStringErrorStyle(fileVideoForConversionMessage)
+				return
+			}
+			if r == nil {
+				return
+			}
 
-				fileInput.Path = r.URI().Path()
-				fileInput.Name = r.URI().Name()
-				fileInput.Ext = r.URI().Extension()
+			fileInput.Path = r.URI().Path()
+			fileInput.Name = r.URI().Name()
+			fileInput.Ext = r.URI().Extension()
 
-				fileVideoForConversionMessage.Text = r.URI().Path()
-				setStringSuccessStyle(fileVideoForConversionMessage)
+			fileVideoForConversionMessage.Text = r.URI().Path()
+			setStringSuccessStyle(fileVideoForConversionMessage)
 
-				form.Enable()
-				progress.Value = 0
-				progress.Refresh()
-				conversionMessage.Text = ""
+			form.Enable()
+			conversionMessage.Text = ""
 
-				listableURI := storage.NewFileURI(filepath.Dir(r.URI().Path()))
-				locationURI, err = storage.ListerForURI(listableURI)
-			}, v.w)
-		helper.FileDialogResize(fileDialog, v.w)
-		fileDialog.Show()
-		if locationURI != nil {
-			fileDialog.SetLocation(locationURI)
-		}
+			listableURI := storage.NewFileURI(filepath.Dir(r.URI().Path()))
+			locationURI, err = storage.ListerForURI(listableURI)
+		}, locationURI)
 	})
 
 	return button, fileVideoForConversionMessage, fileInput
@@ -196,36 +180,30 @@ func (v View) getButtonForSelectingDirectoryForSaving() (button *widget.Button, 
 	path := ""
 	dirPath = &path
 
-	buttonTitle := v.localizerService.GetMessage(&i18n.LocalizeConfig{
+	buttonTitle := v.app.GetLocalizerService().GetMessage(&i18n.LocalizeConfig{
 		MessageID: "choose",
 	})
 
 	var locationURI fyne.ListableURI
 
 	button = widget.NewButton(buttonTitle, func() {
-		fileDialog := dialog.NewFolderOpen(
-			func(r fyne.ListableURI, err error) {
-				if err != nil {
-					buttonMessage.Text = err.Error()
-					setStringErrorStyle(buttonMessage)
-					return
-				}
-				if r == nil {
-					return
-				}
+		v.app.GetWindow().NewFolderOpen(func(r fyne.ListableURI, err error) {
+			if err != nil {
+				buttonMessage.Text = err.Error()
+				setStringErrorStyle(buttonMessage)
+				return
+			}
+			if r == nil {
+				return
+			}
 
-				path = r.Path()
+			path = r.Path()
 
-				buttonMessage.Text = r.Path()
-				setStringSuccessStyle(buttonMessage)
-				locationURI, _ = storage.ListerForURI(r)
+			buttonMessage.Text = r.Path()
+			setStringSuccessStyle(buttonMessage)
+			locationURI, _ = storage.ListerForURI(r)
 
-			}, v.w)
-		helper.FileDialogResize(fileDialog, v.w)
-		fileDialog.Show()
-		if locationURI != nil {
-			fileDialog.SetLocation(locationURI)
-		}
+		}, locationURI)
 	})
 
 	return

@@ -3,12 +3,10 @@ package main
 import (
 	"errors"
 	"fyne.io/fyne/v2"
-	"fyne.io/fyne/v2/app"
-	"fyne.io/fyne/v2/container"
-	"fyne.io/fyne/v2/widget"
 	"git.kor-elf.net/kor-elf/gui-for-ffmpeg/convertor"
 	error2 "git.kor-elf.net/kor-elf/gui-for-ffmpeg/error"
 	"git.kor-elf.net/kor-elf/gui-for-ffmpeg/handler"
+	"git.kor-elf.net/kor-elf/gui-for-ffmpeg/kernel"
 	"git.kor-elf.net/kor-elf/gui-for-ffmpeg/localizer"
 	"git.kor-elf.net/kor-elf/gui-for-ffmpeg/menu"
 	"git.kor-elf.net/kor-elf/gui-for-ffmpeg/migration"
@@ -20,36 +18,50 @@ import (
 	"os"
 )
 
-const appVersion string = "0.3.1"
+var app kernel.AppContract
+var ffPathUtilities *kernel.FFPathUtilities
+
+func init() {
+	iconResource, _ := fyne.LoadResourceFromPath("icon.png")
+	appMetadata := &fyne.AppMetadata{
+		ID:      "net.kor-elf.projects.gui-for-ffmpeg",
+		Name:    "GUI for FFmpeg",
+		Version: "0.4.0",
+		Icon:    iconResource,
+	}
+
+	localizerService, err := kernel.NewLocalizer("languages", language.Russian)
+	if err != nil {
+		kernel.PanicErrorLang(err, appMetadata)
+	}
+
+	ffPathUtilities = &kernel.FFPathUtilities{FFmpeg: "", FFprobe: ""}
+	convertorService := kernel.NewService(ffPathUtilities)
+	layoutLocalizerListener := kernel.NewLayoutLocalizerListener()
+	localizerService.AddListener(layoutLocalizerListener)
+
+	queue := kernel.NewQueueList()
+	app = kernel.NewApp(
+		appMetadata,
+		localizerService,
+		queue,
+		kernel.NewQueueLayoutObject(queue, localizerService, layoutLocalizerListener),
+		convertorService,
+	)
+}
 
 func main() {
-	a := app.New()
-	iconResource, err := fyne.LoadResourceFromPath("icon.png")
-	if err == nil {
-		a.SetIcon(iconResource)
-	}
-	w := a.NewWindow("GUI for FFmpeg")
-	w.Resize(fyne.Size{Width: 800, Height: 600})
-	w.CenterOnScreen()
-
-	localizerService, err := localizer.NewService("languages", language.Russian)
-	if err != nil {
-		panicErrorLang(w, err)
-		w.ShowAndRun()
-		return
-	}
-
-	errorView := error2.NewView(w, localizerService)
+	errorView := error2.NewView(app)
 	if canCreateFile("data/database") != true {
 		errorView.PanicErrorWriteDirectoryData()
-		w.ShowAndRun()
+		app.GetWindow().ShowAndRun()
 		return
 	}
 
 	db, err := gorm.Open(sqlite.Open("data/database"), &gorm.Config{})
 	if err != nil {
 		errorView.PanicError(err)
-		w.ShowAndRun()
+		app.GetWindow().ShowAndRun()
 		return
 	}
 
@@ -58,7 +70,7 @@ func main() {
 	err = migration.Run(db)
 	if err != nil {
 		errorView.PanicError(err)
-		w.ShowAndRun()
+		app.GetWindow().ShowAndRun()
 		return
 	}
 
@@ -67,46 +79,43 @@ func main() {
 	pathFFmpeg, err := convertorRepository.GetPathFfmpeg()
 	if err != nil && errors.Is(err, gorm.ErrRecordNotFound) == false {
 		errorView.PanicError(err)
-		w.ShowAndRun()
+		app.GetWindow().ShowAndRun()
 		return
 	}
+	ffPathUtilities.FFmpeg = pathFFmpeg
+
 	pathFFprobe, err := convertorRepository.GetPathFfprobe()
 	if err != nil && errors.Is(err, gorm.ErrRecordNotFound) == false {
 		errorView.PanicError(err)
-		w.ShowAndRun()
+		app.GetWindow().ShowAndRun()
 		return
 	}
+	ffPathUtilities.FFprobe = pathFFprobe
 
-	ffPathUtilities := convertor.FFPathUtilities{FFmpeg: pathFFmpeg, FFprobe: pathFFprobe}
+	app.RunConvertor()
+	defer app.AfterClosing()
 
-	localizerView := localizer.NewView(w, localizerService)
-	convertorView := convertor.NewView(w, localizerService)
-	convertorService := convertor.NewService(ffPathUtilities)
-	defer appCloseWithConvert(convertorService)
-	convertorHandler := handler.NewConvertorHandler(convertorService, convertorView, convertorRepository, localizerService)
+	localizerView := localizer.NewView(app)
+	convertorView := convertor.NewView(app)
+	convertorHandler := handler.NewConvertorHandler(app, convertorView, convertorRepository)
 
 	localizerRepository := localizer.NewRepository(settingRepository)
-	menuView := menu.NewView(w, a, appVersion, localizerService)
-	mainMenu := handler.NewMenuHandler(convertorHandler, menuView, localizerService, localizerView, localizerRepository)
+	menuView := menu.NewView(app)
+	localizerListener := handler.NewLocalizerListener()
+	app.GetLocalizerService().AddListener(localizerListener)
+	mainMenu := handler.NewMenuHandler(app, convertorHandler, menuView, localizerView, localizerRepository, localizerListener)
 
-	mainHandler := handler.NewMainHandler(convertorHandler, mainMenu, localizerRepository, localizerService)
+	mainHandler := handler.NewMainHandler(app, convertorHandler, mainMenu, localizerRepository)
 	mainHandler.Start()
 
-	w.SetMainMenu(mainMenu.GetMainMenu())
-
-	w.ShowAndRun()
+	app.GetWindow().SetMainMenu(mainMenu.GetMainMenu())
+	app.GetWindow().ShowAndRun()
 }
 
 func appCloseWithDb(db *gorm.DB) {
 	sqlDB, err := db.DB()
 	if err == nil {
 		_ = sqlDB.Close()
-	}
-}
-
-func appCloseWithConvert(convertorService convertor.ServiceContract) {
-	for _, cmd := range convertorService.GetRunningProcesses() {
-		_ = cmd.Process.Kill()
 	}
 }
 
@@ -117,11 +126,4 @@ func canCreateFile(path string) bool {
 	}
 	_ = file.Close()
 	return true
-}
-
-func panicErrorLang(w fyne.Window, err error) {
-	w.SetContent(container.NewVBox(
-		widget.NewLabel("Произошла ошибка!"),
-		widget.NewLabel("произошла ошибка при получении языковых переводах. \n\r"+err.Error()),
-	))
 }

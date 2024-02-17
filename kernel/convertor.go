@@ -1,4 +1,4 @@
-package convertor
+package kernel
 
 import (
 	"errors"
@@ -10,7 +10,7 @@ import (
 	"strings"
 )
 
-type ServiceContract interface {
+type ConvertorContract interface {
 	RunConvert(setting ConvertSetting, progress ProgressContract) error
 	GetTotalDuration(file *File) (float64, error)
 	GetFFmpegVesrion() (string, error)
@@ -35,35 +35,23 @@ type runningProcesses struct {
 	numberOfStarts int
 }
 
-type Service struct {
+type Convertor struct {
 	ffPathUtilities  *FFPathUtilities
 	runningProcesses runningProcesses
-}
-
-type File struct {
-	Path string
-	Name string
-	Ext  string
-}
-
-type ConvertSetting struct {
-	VideoFileInput       *File
-	VideoFileOut         *File
-	OverwriteOutputFiles bool
 }
 
 type ConvertData struct {
 	totalDuration float64
 }
 
-func NewService(ffPathUtilities FFPathUtilities) *Service {
-	return &Service{
-		ffPathUtilities:  &ffPathUtilities,
+func NewService(ffPathUtilities *FFPathUtilities) *Convertor {
+	return &Convertor{
+		ffPathUtilities:  ffPathUtilities,
 		runningProcesses: runningProcesses{items: map[int]*exec.Cmd{}, numberOfStarts: 0},
 	}
 }
 
-func (s Service) RunConvert(setting ConvertSetting, progress ProgressContract) error {
+func (s Convertor) RunConvert(setting ConvertSetting, progress ProgressContract) error {
 	overwriteOutputFiles := "-n"
 	if setting.OverwriteOutputFiles == true {
 		overwriteOutputFiles = "-y"
@@ -103,7 +91,7 @@ func (s Service) RunConvert(setting ConvertSetting, progress ProgressContract) e
 	return nil
 }
 
-func (s Service) GetTotalDuration(file *File) (duration float64, err error) {
+func (s Convertor) GetTotalDuration(file *File) (duration float64, err error) {
 	args := []string{"-v", "error", "-select_streams", "v:0", "-count_packets", "-show_entries", "stream=nb_read_packets", "-of", "csv=p=0", file.Path}
 	cmd := exec.Command(s.ffPathUtilities.FFprobe, args...)
 	helper.PrepareBackgroundCommand(cmd)
@@ -118,7 +106,7 @@ func (s Service) GetTotalDuration(file *File) (duration float64, err error) {
 	return strconv.ParseFloat(strings.TrimSpace(string(out)), 64)
 }
 
-func (s Service) GetFFmpegVesrion() (string, error) {
+func (s Convertor) GetFFmpegVesrion() (string, error) {
 	cmd := exec.Command(s.ffPathUtilities.FFmpeg, "-version")
 	helper.PrepareBackgroundCommand(cmd)
 	out, err := cmd.CombinedOutput()
@@ -129,7 +117,7 @@ func (s Service) GetFFmpegVesrion() (string, error) {
 	return text[0], nil
 }
 
-func (s Service) GetFFprobeVersion() (string, error) {
+func (s Convertor) GetFFprobeVersion() (string, error) {
 	cmd := exec.Command(s.ffPathUtilities.FFprobe, "-version")
 	helper.PrepareBackgroundCommand(cmd)
 	out, err := cmd.CombinedOutput()
@@ -140,7 +128,7 @@ func (s Service) GetFFprobeVersion() (string, error) {
 	return text[0], nil
 }
 
-func (s Service) ChangeFFmpegPath(path string) (bool, error) {
+func (s Convertor) ChangeFFmpegPath(path string) (bool, error) {
 	cmd := exec.Command(path, "-version")
 	helper.PrepareBackgroundCommand(cmd)
 	out, err := cmd.CombinedOutput()
@@ -154,7 +142,7 @@ func (s Service) ChangeFFmpegPath(path string) (bool, error) {
 	return true, nil
 }
 
-func (s Service) ChangeFFprobePath(path string) (bool, error) {
+func (s Convertor) ChangeFFprobePath(path string) (bool, error) {
 	cmd := exec.Command(path, "-version")
 	helper.PrepareBackgroundCommand(cmd)
 	out, err := cmd.CombinedOutput()
@@ -168,6 +156,6 @@ func (s Service) ChangeFFprobePath(path string) (bool, error) {
 	return true, nil
 }
 
-func (s Service) GetRunningProcesses() map[int]*exec.Cmd {
+func (s Convertor) GetRunningProcesses() map[int]*exec.Cmd {
 	return s.runningProcesses.items
 }

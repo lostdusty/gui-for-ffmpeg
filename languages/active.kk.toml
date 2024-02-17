@@ -38,6 +38,10 @@ other = "Файлды қайта жазуға рұқсат беріңіз"
 hash = "sha1-f60bb5f761024d973834b5e9d25ceebce2c85f94"
 other = "таңдау"
 
+[completed]
+hash = "sha1-398c7d4f7b0d522afb930769c0fbb1a9f4b61fbe"
+other = "Дайын"
+
 [converterVideoFilesSubmitTitle]
 hash = "sha1-7ac460f3c24c9952082f2db6e4d62f752598709c"
 other = "Файлды түрлендіру"
@@ -110,6 +114,10 @@ other = "Түрлендіруге арналған файл:"
 hash = "sha1-6a45cef900c668effcb2ab10da05855c1fd10f6f"
 other = "Анықтама"
 
+[inProgress]
+hash = "sha1-eff79c40e2100ae5fadf3a7d99336025edcca8b5"
+other = "Орындалуда"
+
 [languageSelectionFormHead]
 hash = "sha1-0ff5fa82cf684112660128cba1711297acf11003"
 other = "Тілді ауыстыру"
@@ -142,6 +150,10 @@ other = "Жобаның веб-сайты"
 hash = "sha1-fa2e4994a301bb24bc2a8fa166e5486ea95a7475"
 other = "**Бағдарлама нұсқасы:** {{.Version}}"
 
+[queue]
+hash = "sha1-aec93b16baeaf55fed871075c9494a460e4a91b8"
+other = "Кезек"
+
 [save]
 hash = "sha1-4864057d626a868fa60f999bed3191d61d045ddc"
 other = "Сақтау"
@@ -165,3 +177,7 @@ other = "Сіз оны осы жерден жүктей аласыз"
 [unzipRun]
 hash = "sha1-c554dad13026668a1f6adf3171837c5d51bbac36"
 other = "Орамнан шығарылуда..."
+
+[waiting]
+hash = "sha1-307429dd84150877080c4bbff2b340d1e7dadff2"
+other = "Күту"

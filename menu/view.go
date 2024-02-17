@@ -5,7 +5,7 @@ import (
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/widget"
-	"git.kor-elf.net/kor-elf/gui-for-ffmpeg/localizer"
+	"git.kor-elf.net/kor-elf/gui-for-ffmpeg/kernel"
 	"github.com/nicksnyder/go-i18n/v2/i18n"
 	"golang.org/x/image/colornames"
 	"net/url"
@@ -16,23 +16,17 @@ type ViewContract interface {
 }
 
 type View struct {
-	w                fyne.Window
-	app              fyne.App
-	appVersion       string
-	localizerService localizer.ServiceContract
+	app kernel.AppContract
 }
 
-func NewView(w fyne.Window, app fyne.App, appVersion string, localizerService localizer.ServiceContract) *View {
+func NewView(app kernel.AppContract) *View {
 	return &View{
-		w:                w,
-		app:              app,
-		appVersion:       appVersion,
-		localizerService: localizerService,
+		app: app,
 	}
 }
 
 func (v View) About(ffmpegVersion string, ffprobeVersion string) {
-	view := v.app.NewWindow(v.localizerService.GetMessage(&i18n.LocalizeConfig{
+	view := v.app.GetAppFyne().NewWindow(v.app.GetLocalizerService().GetMessage(&i18n.LocalizeConfig{
 		MessageID: "about",
 	}))
 	view.Resize(fyne.Size{Width: 793, Height: 550})
@@ -42,7 +36,7 @@ func (v View) About(ffmpegVersion string, ffprobeVersion string) {
 	programmName.TextStyle = fyne.TextStyle{Bold: true}
 	programmName.TextSize = 20
 
-	programmLink := widget.NewHyperlink(v.localizerService.GetMessage(&i18n.LocalizeConfig{
+	programmLink := widget.NewHyperlink(v.app.GetLocalizerService().GetMessage(&i18n.LocalizeConfig{
 		MessageID: "programmLink",
 	}), &url.URL{
 		Scheme: "https",
@@ -50,7 +44,7 @@ func (v View) About(ffmpegVersion string, ffprobeVersion string) {
 		Path:   "kor-elf/gui-for-ffmpeg/releases",
 	})
 
-	licenseLink := widget.NewHyperlink(v.localizerService.GetMessage(&i18n.LocalizeConfig{
+	licenseLink := widget.NewHyperlink(v.app.GetLocalizerService().GetMessage(&i18n.LocalizeConfig{
 		MessageID: "licenseLink",
 	}), &url.URL{
 		Scheme: "https",
@@ -58,7 +52,7 @@ func (v View) About(ffmpegVersion string, ffprobeVersion string) {
 		Path:   "kor-elf/gui-for-ffmpeg/src/branch/main/LICENSE",
 	})
 
-	licenseLinkOther := widget.NewHyperlink(v.localizerService.GetMessage(&i18n.LocalizeConfig{
+	licenseLinkOther := widget.NewHyperlink(v.app.GetLocalizerService().GetMessage(&i18n.LocalizeConfig{
 		MessageID: "licenseLinkOther",
 	}), &url.URL{
 		Scheme: "https",
@@ -66,16 +60,16 @@ func (v View) About(ffmpegVersion string, ffprobeVersion string) {
 		Path:   "kor-elf/gui-for-ffmpeg/src/branch/main/LICENSE-3RD-PARTY.txt",
 	})
 
-	programmVersion := widget.NewRichTextFromMarkdown(v.localizerService.GetMessage(&i18n.LocalizeConfig{
+	programmVersion := widget.NewRichTextFromMarkdown(v.app.GetLocalizerService().GetMessage(&i18n.LocalizeConfig{
 		MessageID: "programmVersion",
 		TemplateData: map[string]string{
-			"Version": v.appVersion,
+			"Version": v.app.GetAppFyne().Metadata().Version,
 		},
 	}))
 
 	aboutText := widget.NewRichText(
 		&widget.TextSegment{
-			Text: v.localizerService.GetMessage(&i18n.LocalizeConfig{
+			Text: v.app.GetLocalizerService().GetMessage(&i18n.LocalizeConfig{
 				MessageID: "aboutText",
 			}),
 		},
@@ -84,10 +78,10 @@ func (v View) About(ffmpegVersion string, ffprobeVersion string) {
 	image.SetMinSize(fyne.Size{Width: 100, Height: 100})
 	image.FillMode = canvas.ImageFillContain
 
-	ffmpegTrademark := widget.NewRichTextFromMarkdown(v.localizerService.GetMessage(&i18n.LocalizeConfig{
+	ffmpegTrademark := widget.NewRichTextFromMarkdown(v.app.GetLocalizerService().GetMessage(&i18n.LocalizeConfig{
 		MessageID: "ffmpegTrademark",
 	}))
-	ffmpegLGPL := widget.NewRichTextFromMarkdown(v.localizerService.GetMessage(&i18n.LocalizeConfig{
+	ffmpegLGPL := widget.NewRichTextFromMarkdown(v.app.GetLocalizerService().GetMessage(&i18n.LocalizeConfig{
 		MessageID: "ffmpegLGPL",
 	}))
 
@@ -105,7 +99,7 @@ func (v View) About(ffmpegVersion string, ffprobeVersion string) {
 			)),
 			v.getAboutFfmpeg(ffmpegVersion),
 			v.getAboutFfprobe(ffprobeVersion),
-			widget.NewCard(v.localizerService.GetMessage(&i18n.LocalizeConfig{
+			widget.NewCard(v.app.GetLocalizerService().GetMessage(&i18n.LocalizeConfig{
 				MessageID: "AlsoUsedProgram",
 			}), "", v.getOther()),
 		)),
@@ -123,7 +117,7 @@ func (v View) getAboutFfmpeg(version string) *fyne.Container {
 	programmName.TextStyle = fyne.TextStyle{Bold: true}
 	programmName.TextSize = 20
 
-	programmLink := widget.NewHyperlink(v.localizerService.GetMessage(&i18n.LocalizeConfig{
+	programmLink := widget.NewHyperlink(v.app.GetLocalizerService().GetMessage(&i18n.LocalizeConfig{
 		MessageID: "programmLink",
 	}), &url.URL{
 		Scheme: "https",
@@ -131,7 +125,7 @@ func (v View) getAboutFfmpeg(version string) *fyne.Container {
 		Path:   "",
 	})
 
-	licenseLink := widget.NewHyperlink(v.localizerService.GetMessage(&i18n.LocalizeConfig{
+	licenseLink := widget.NewHyperlink(v.app.GetLocalizerService().GetMessage(&i18n.LocalizeConfig{
 		MessageID: "licenseLink",
 	}), &url.URL{
 		Scheme: "https",
@@ -153,7 +147,7 @@ func (v View) getAboutFfprobe(version string) *fyne.Container {
 	programmName.TextStyle = fyne.TextStyle{Bold: true}
 	programmName.TextSize = 20
 
-	programmLink := widget.NewHyperlink(v.localizerService.GetMessage(&i18n.LocalizeConfig{
+	programmLink := widget.NewHyperlink(v.app.GetLocalizerService().GetMessage(&i18n.LocalizeConfig{
 		MessageID: "programmLink",
 	}), &url.URL{
 		Scheme: "https",
@@ -161,7 +155,7 @@ func (v View) getAboutFfprobe(version string) *fyne.Container {
 		Path:   "ffprobe.html",
 	})
 
-	licenseLink := widget.NewHyperlink(v.localizerService.GetMessage(&i18n.LocalizeConfig{
+	licenseLink := widget.NewHyperlink(v.app.GetLocalizerService().GetMessage(&i18n.LocalizeConfig{
 		MessageID: "licenseLink",
 	}), &url.URL{
 		Scheme: "https",

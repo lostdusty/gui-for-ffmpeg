@@ -1,4 +1,4 @@
-package localizer
+package kernel
 
 import (
 	"github.com/BurntSushi/toml"
@@ -10,12 +10,17 @@ import (
 	"sort"
 )
 
-type ServiceContract interface {
+type LocalizerContract interface {
 	GetLanguages() []Lang
 	GetMessage(localizeConfig *i18n.LocalizeConfig) string
 	SetCurrentLanguage(lang Lang) error
 	SetCurrentLanguageByCode(code string) error
 	GetCurrentLanguage() *CurrentLanguage
+	AddListener(listener LocalizerListenerContract)
+}
+
+type LocalizerListenerContract interface {
+	Change(localizerService LocalizerContract)
 }
 
 type Lang struct {
@@ -29,13 +34,14 @@ type CurrentLanguage struct {
 	localizerDefault *i18n.Localizer
 }
 
-type Service struct {
-	bundle          *i18n.Bundle
-	languages       []Lang
-	currentLanguage *CurrentLanguage
+type Localizer struct {
+	bundle            *i18n.Bundle
+	languages         []Lang
+	currentLanguage   *CurrentLanguage
+	localizerListener map[int]LocalizerListenerContract
 }
 
-func NewService(directory string, languageDefault language.Tag) (*Service, error) {
+func NewLocalizer(directory string, languageDefault language.Tag) (*Localizer, error) {
 	bundle := i18n.NewBundle(languageDefault)
 	bundle.RegisterUnmarshalFunc("toml", toml.Unmarshal)
 
@@ -46,7 +52,7 @@ func NewService(directory string, languageDefault language.Tag) (*Service, error
 
 	localizerDefault := i18n.NewLocalizer(bundle, languageDefault.String())
 
-	return &Service{
+	return &Localizer{
 		bundle:    bundle,
 		languages: languages,
 		currentLanguage: &CurrentLanguage{
@@ -57,6 +63,7 @@ func NewService(directory string, languageDefault language.Tag) (*Service, error
 			localizer:        localizerDefault,
 			localizerDefault: localizerDefault,
 		},
+		localizerListener: map[int]LocalizerListenerContract{},
 	}, nil
 }
 
@@ -81,14 +88,14 @@ func initLanguages(directory string, bundle *i18n.Bundle) ([]Lang, error) {
 	return languages, nil
 }
 
-func (s Service) GetLanguages() []Lang {
-	return s.languages
+func (l Localizer) GetLanguages() []Lang {
+	return l.languages
 }
 
-func (s Service) GetMessage(localizeConfig *i18n.LocalizeConfig) string {
-	message, err := s.GetCurrentLanguage().localizer.Localize(localizeConfig)
+func (l Localizer) GetMessage(localizeConfig *i18n.LocalizeConfig) string {
+	message, err := l.GetCurrentLanguage().localizer.Localize(localizeConfig)
 	if err != nil {
-		message, err = s.GetCurrentLanguage().localizerDefault.Localize(localizeConfig)
+		message, err = l.GetCurrentLanguage().localizerDefault.Localize(localizeConfig)
 		if err != nil {
 			return err.Error()
 		}
@@ -96,23 +103,34 @@ func (s Service) GetMessage(localizeConfig *i18n.LocalizeConfig) string {
 	return message
 }
 
-func (s Service) SetCurrentLanguage(lang Lang) error {
-	s.currentLanguage.Lang = lang
-	s.currentLanguage.localizer = i18n.NewLocalizer(s.bundle, lang.Code)
+func (l Localizer) SetCurrentLanguage(lang Lang) error {
+	l.currentLanguage.Lang = lang
+	l.currentLanguage.localizer = i18n.NewLocalizer(l.bundle, lang.Code)
+	l.eventSetCurrentLanguage()
 	return nil
 }
 
-func (s Service) SetCurrentLanguageByCode(code string) error {
+func (l Localizer) SetCurrentLanguageByCode(code string) error {
 	lang, err := language.Parse(code)
 	if err != nil {
 		return err
 	}
 	title := cases.Title(lang).String(display.Self.Name(lang))
-	return s.SetCurrentLanguage(Lang{Code: lang.String(), Title: title})
+	return l.SetCurrentLanguage(Lang{Code: lang.String(), Title: title})
 }
 
-func (s Service) GetCurrentLanguage() *CurrentLanguage {
-	return s.currentLanguage
+func (l Localizer) GetCurrentLanguage() *CurrentLanguage {
+	return l.currentLanguage
+}
+
+func (l Localizer) AddListener(listener LocalizerListenerContract) {
+	l.localizerListener[len(l.localizerListener)] = listener
+}
+
+func (l Localizer) eventSetCurrentLanguage() {
+	for _, listener := range l.localizerListener {
+		listener.Change(l)
+	}
 }
 
 type languagesSort []Lang

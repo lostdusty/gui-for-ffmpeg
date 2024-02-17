@@ -3,27 +3,26 @@ package localizer
 import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/widget"
+	"git.kor-elf.net/kor-elf/gui-for-ffmpeg/kernel"
 	"github.com/nicksnyder/go-i18n/v2/i18n"
 )
 
 type ViewContract interface {
-	LanguageSelection(funcSelected func(lang Lang))
+	LanguageSelection(funcSelected func(lang kernel.Lang))
 }
 
 type View struct {
-	w                fyne.Window
-	localizerService ServiceContract
+	app kernel.AppContract
 }
 
-func NewView(w fyne.Window, localizerService ServiceContract) *View {
+func NewView(app kernel.AppContract) *View {
 	return &View{
-		w:                w,
-		localizerService: localizerService,
+		app: app,
 	}
 }
 
-func (v View) LanguageSelection(funcSelected func(lang Lang)) {
-	languages := v.localizerService.GetLanguages()
+func (v View) LanguageSelection(funcSelected func(lang kernel.Lang)) {
+	languages := v.app.GetLocalizerService().GetLanguages()
 	listView := widget.NewList(
 		func() int {
 			return len(languages)
@@ -36,18 +35,17 @@ func (v View) LanguageSelection(funcSelected func(lang Lang)) {
 			block.SetText(languages[i].Title)
 		})
 	listView.OnSelected = func(id widget.ListItemID) {
-		_ = v.localizerService.SetCurrentLanguage(languages[id])
+		_ = v.app.GetLocalizerService().SetCurrentLanguage(languages[id])
 		funcSelected(languages[id])
 	}
 
-	messageHead := v.localizerService.GetMessage(&i18n.LocalizeConfig{
+	messageHead := v.app.GetLocalizerService().GetMessage(&i18n.LocalizeConfig{
 		MessageID: "languageSelectionHead",
 	})
-
-	v.w.SetContent(widget.NewCard(messageHead, "", listView))
+	v.app.GetWindow().SetContent(widget.NewCard(messageHead, "", listView))
 }
 
-func LanguageSelectionForm(localizerService ServiceContract, funcSelected func(lang Lang)) fyne.CanvasObject {
+func LanguageSelectionForm(localizerService kernel.LocalizerContract, funcSelected func(lang kernel.Lang)) fyne.CanvasObject {
 	languages := localizerService.GetLanguages()
 	currentLanguage := localizerService.GetCurrentLanguage()
 	listView := widget.NewList(

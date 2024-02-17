@@ -1,3 +1,15 @@
-[testFF]
-hash = "sha1-f5b8ed88e9609963035d2235be0a79bbec619976"
-other = "FFmpeg функционалдығы тексерілуде..."
+[completed]
+hash = "sha1-398c7d4f7b0d522afb930769c0fbb1a9f4b61fbe"
+other = "Дайын"
+
+[inProgress]
+hash = "sha1-eff79c40e2100ae5fadf3a7d99336025edcca8b5"
+other = "Орындалуда"
+
+[queue]
+hash = "sha1-aec93b16baeaf55fed871075c9494a460e4a91b8"
+other = "Кезек"
+
+[waiting]
+hash = "sha1-307429dd84150877080c4bbff2b340d1e7dadff2"
+other = "Күту"

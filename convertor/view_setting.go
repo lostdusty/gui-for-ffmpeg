@@ -4,10 +4,8 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
-	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/storage"
 	"fyne.io/fyne/v2/widget"
-	"git.kor-elf.net/kor-elf/gui-for-ffmpeg/helper"
 	"github.com/nicksnyder/go-i18n/v2/i18n"
 	"image/color"
 	"net/url"
@@ -37,13 +35,13 @@ func (v View) SelectFFPath(
 	form := &widget.Form{
 		Items: []*widget.FormItem{
 			{
-				Text: v.localizerService.GetMessage(&i18n.LocalizeConfig{
+				Text: v.app.GetLocalizerService().GetMessage(&i18n.LocalizeConfig{
 					MessageID: "titleDownloadLink",
 				}),
 				Widget: link,
 			},
 			{
-				Text: v.localizerService.GetMessage(&i18n.LocalizeConfig{
+				Text: v.app.GetLocalizerService().GetMessage(&i18n.LocalizeConfig{
 					MessageID: "pathToFfmpeg",
 				}),
 				Widget: buttonFFmpeg,
@@ -52,7 +50,7 @@ func (v View) SelectFFPath(
 				Widget: container.NewHScroll(buttonFFmpegMessage),
 			},
 			{
-				Text: v.localizerService.GetMessage(&i18n.LocalizeConfig{
+				Text: v.app.GetLocalizerService().GetMessage(&i18n.LocalizeConfig{
 					MessageID: "pathToFfprobe",
 				}),
 				Widget: buttonFFprobe,
@@ -64,7 +62,7 @@ func (v View) SelectFFPath(
 				Widget: errorMessage,
 			},
 		},
-		SubmitText: v.localizerService.GetMessage(&i18n.LocalizeConfig{
+		SubmitText: v.app.GetLocalizerService().GetMessage(&i18n.LocalizeConfig{
 			MessageID: "save",
 		}),
 		OnSubmit: func() {
@@ -76,15 +74,15 @@ func (v View) SelectFFPath(
 	}
 	if cancel != nil {
 		form.OnCancel = cancel
-		form.CancelText = v.localizerService.GetMessage(&i18n.LocalizeConfig{
+		form.CancelText = v.app.GetLocalizerService().GetMessage(&i18n.LocalizeConfig{
 			MessageID: "cancel",
 		})
 	}
-	selectFFPathTitle := v.localizerService.GetMessage(&i18n.LocalizeConfig{
+	selectFFPathTitle := v.app.GetLocalizerService().GetMessage(&i18n.LocalizeConfig{
 		MessageID: "selectFFPathTitle",
 	})
 
-	v.w.SetContent(widget.NewCard(selectFFPathTitle, "", container.NewVBox(
+	v.app.GetWindow().SetContent(widget.NewCard(selectFFPathTitle, "", container.NewVBox(
 		form,
 		v.blockDownloadFFmpeg(donwloadFFmpeg),
 	)))
@@ -97,7 +95,7 @@ func (v View) getButtonSelectFile(path string) (filePath *string, button *widget
 	buttonMessage.TextSize = 16
 	buttonMessage.TextStyle = fyne.TextStyle{Bold: true}
 
-	buttonTitle := v.localizerService.GetMessage(&i18n.LocalizeConfig{
+	buttonTitle := v.app.GetLocalizerService().GetMessage(&i18n.LocalizeConfig{
 		MessageID: "choose",
 	})
 
@@ -108,30 +106,24 @@ func (v View) getButtonSelectFile(path string) (filePath *string, button *widget
 	}
 
 	button = widget.NewButton(buttonTitle, func() {
-		fileDialog := dialog.NewFileOpen(
-			func(r fyne.URIReadCloser, err error) {
-				if err != nil {
-					buttonMessage.Text = err.Error()
-					setStringErrorStyle(buttonMessage)
-					return
-				}
-				if r == nil {
-					return
-				}
+		v.app.GetWindow().NewFileOpen(func(r fyne.URIReadCloser, err error) {
+			if err != nil {
+				buttonMessage.Text = err.Error()
+				setStringErrorStyle(buttonMessage)
+				return
+			}
+			if r == nil {
+				return
+			}
 
-				path = r.URI().Path()
+			path = r.URI().Path()
 
-				buttonMessage.Text = r.URI().Path()
-				setStringSuccessStyle(buttonMessage)
+			buttonMessage.Text = r.URI().Path()
+			setStringSuccessStyle(buttonMessage)
 
-				listableURI := storage.NewFileURI(filepath.Dir(r.URI().Path()))
-				locationURI, _ = storage.ListerForURI(listableURI)
-			}, v.w)
-		helper.FileDialogResize(fileDialog, v.w)
-		fileDialog.Show()
-		if locationURI != nil {
-			fileDialog.SetLocation(locationURI)
-		}
+			listableURI := storage.NewFileURI(filepath.Dir(r.URI().Path()))
+			locationURI, _ = storage.ListerForURI(listableURI)
+		}, locationURI)
 	})
 
 	return

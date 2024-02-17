@@ -8,7 +8,7 @@ import (
 	"errors"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/widget"
-	"git.kor-elf.net/kor-elf/gui-for-ffmpeg/src/convertor"
+	"git.kor-elf.net/kor-elf/gui-for-ffmpeg/kernel"
 	"github.com/nicksnyder/go-i18n/v2/i18n"
 	"io"
 	"net/http"
@@ -17,8 +17,8 @@ import (
 	"strings"
 )
 
-func getPathsToFF() []convertor.FFPathUtilities {
-	return []convertor.FFPathUtilities{{"ffmpeg\\bin\\ffmpeg.exe", "ffmpeg\\bin\\ffprobe.exe"}}
+func getPathsToFF() []kernel.FFPathUtilities {
+	return []kernel.FFPathUtilities{{"ffmpeg\\bin\\ffmpeg.exe", "ffmpeg\\bin\\ffprobe.exe"}}
 }
 
 func (h ConvertorHandler) downloadFFmpeg(progressBar *widget.ProgressBar, progressMessage *canvas.Text) (err error) {

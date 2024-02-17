@@ -1,27 +1,28 @@
 package handler
 
 import (
+	"git.kor-elf.net/kor-elf/gui-for-ffmpeg/kernel"
 	"git.kor-elf.net/kor-elf/gui-for-ffmpeg/localizer"
 )
 
 type MainHandler struct {
+	app                 kernel.AppContract
 	convertorHandler    ConvertorHandlerContract
 	menuHandler         MenuHandlerContract
 	localizerRepository localizer.RepositoryContract
-	localizerService    localizer.ServiceContract
 }
 
 func NewMainHandler(
+	app kernel.AppContract,
 	convertorHandler ConvertorHandlerContract,
 	menuHandler MenuHandlerContract,
 	localizerRepository localizer.RepositoryContract,
-	localizerService localizer.ServiceContract,
 ) *MainHandler {
 	return &MainHandler{
+		app:                 app,
 		convertorHandler:    convertorHandler,
 		menuHandler:         menuHandler,
 		localizerRepository: localizerRepository,
-		localizerService:    localizerService,
 	}
 }
 
@@ -31,7 +32,7 @@ func (h MainHandler) Start() {
 		h.menuHandler.LanguageSelection()
 		return
 	}
-	_ = h.localizerService.SetCurrentLanguageByCode(language)
+	_ = h.app.GetLocalizerService().SetCurrentLanguageByCode(language)
 
 	h.convertorHandler.MainConvertor()
 }
