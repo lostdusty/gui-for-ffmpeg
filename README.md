@@ -11,11 +11,11 @@
 
 ## Установка через fyne:
 1. go install fyne.io/fyne/v2/cmd/fyne@latest
-2. fyne get git.kor-elf.net/kor-elf/gui-for-ffmpeg/src
+2. fyne get git.kor-elf.net/kor-elf/gui-for-ffmpeg
 
 ## Скомпилировать через исходники:
 1. git clone https://git.kor-elf.net/kor-elf/gui-for-ffmpeg.git
-2. Переходим в папку проекта и там переходим в папку src: **cd gui-for-ffmpeg/src**
+2. Переходим в папку проекта и там переходим в папку src: **cd gui-for-ffmpeg**
 3. Ознакамливаемся, что нужно ещё установить для Вашей ОС для простого запуска (через go run) тут: https://docs.fyne.io/started/
 4. *(не обязательный шаг)* Просто запустить можно так: **go run main.go**
 5. go install github.com/fyne-io/fyne-cross@latest
@@ -35,9 +35,8 @@
 
 ## Работа с переводами:
 1. go install -v github.com/nicksnyder/go-i18n/v2/goi18n@latest
-2. Переходим в папке проекта в папку src: **cd ./src**
-3. goi18n merge -sourceLanguage ru -outdir languages languages/active.\*.toml languages/translate.\*.toml
-4. В файлах **languages/translate.\*.toml** переводим текст на нужный язык
-5. goi18n merge -sourceLanguage ru -outdir languages languages/active.\*.toml languages/translate.\*.toml
+2. goi18n merge -sourceLanguage ru -outdir languages languages/active.\*.toml languages/translate.\*.toml
+3. В файлах **languages/translate.\*.toml** переводим текст на нужный язык
+4. goi18n merge -sourceLanguage ru -outdir languages languages/active.\*.toml languages/translate.\*.toml
 
 Более подробно можно почитать тут: https://github.com/nicksnyder/go-i18n
