@@ -29,7 +29,7 @@ func (v View) blockDownloadFFmpeg(
 
 	var buttonDownloadFFmpeg *widget.Button
 
-	buttonDownloadFFmpeg = widget.NewButton(v.localizerService.GetMessage(&i18n.LocalizeConfig{
+	buttonDownloadFFmpeg = widget.NewButton(v.app.GetLocalizerService().GetMessage(&i18n.LocalizeConfig{
 		MessageID: "download",
 	}), func() {
 		buttonDownloadFFmpeg.Disable()
@@ -42,13 +42,13 @@ func (v View) blockDownloadFFmpeg(
 		buttonDownloadFFmpeg.Enable()
 	})
 
-	downloadFFmpegFromSiteMessage := v.localizerService.GetMessage(&i18n.LocalizeConfig{
+	downloadFFmpegFromSiteMessage := v.app.GetLocalizerService().GetMessage(&i18n.LocalizeConfig{
 		MessageID: "downloadFFmpegFromSite",
 	})
 
 	return container.NewVBox(
 		canvas.NewLine(colornames.Darkgreen),
-		widget.NewCard(v.localizerService.GetMessage(&i18n.LocalizeConfig{
+		widget.NewCard(v.app.GetLocalizerService().GetMessage(&i18n.LocalizeConfig{
 			MessageID: "buttonDownloadFFmpeg",
 		}), "", container.NewVBox(
 			widget.NewRichTextFromMarkdown(

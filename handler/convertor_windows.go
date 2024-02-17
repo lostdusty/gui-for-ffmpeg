@@ -29,7 +29,7 @@ func (h ConvertorHandler) downloadFFmpeg(progressBar *widget.ProgressBar, progre
 			return err
 		}
 	}
-	progressMessage.Text = h.localizerService.GetMessage(&i18n.LocalizeConfig{
+	progressMessage.Text = h.app.GetLocalizerService().GetMessage(&i18n.LocalizeConfig{
 		MessageID: "downloadRun",
 	})
 	progressMessage.Refresh()
@@ -38,7 +38,7 @@ func (h ConvertorHandler) downloadFFmpeg(progressBar *widget.ProgressBar, progre
 		return err
 	}
 
-	progressMessage.Text = h.localizerService.GetMessage(&i18n.LocalizeConfig{
+	progressMessage.Text = h.app.GetLocalizerService().GetMessage(&i18n.LocalizeConfig{
 		MessageID: "unzipRun",
 	})
 	progressMessage.Refresh()
@@ -48,7 +48,7 @@ func (h ConvertorHandler) downloadFFmpeg(progressBar *widget.ProgressBar, progre
 	}
 	_ = os.Remove("ffmpeg/ffmpeg.zip")
 
-	progressMessage.Text = h.localizerService.GetMessage(&i18n.LocalizeConfig{
+	progressMessage.Text = h.app.GetLocalizerService().GetMessage(&i18n.LocalizeConfig{
 		MessageID: "testFF",
 	})
 	progressMessage.Refresh()
