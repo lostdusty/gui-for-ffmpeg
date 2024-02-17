@@ -25,9 +25,9 @@
    * fyne-cross linux --icon icon.png --app-id "." -name "gui-for-ffmpeg"
 7. Создаться папка **fyne-cross/bin** и там будет созданна папка с тем названием под которую Вы компилировали приложения (linux-amd64 или windows-amd64).
 8. В папку **fyne-cross/bin/linux-amd64** или **fyne-cross/bin/windows-amd64** копируете:
-   * src/icon.png
-   * src/data
-   * src/languages
+   * icon.png
+   * data
+   * languages
    * LICENSE
    * LICENSE-3RD-PARTY.txt
 <p><strong>Структура должна получиться такая:</strong></p>
