@@ -10,18 +10,6 @@ type Queue struct {
 	Error   error
 }
 
-type File struct {
-	Path string
-	Name string
-	Ext  string
-}
-
-type ConvertSetting struct {
-	VideoFileInput       File
-	VideoFileOut         File
-	OverwriteOutputFiles bool
-}
-
 type StatusContract interface {
 	name() string
 	ordinal() int

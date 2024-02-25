@@ -10,6 +10,18 @@ import (
 	"strings"
 )
 
+type File struct {
+	Path string
+	Name string
+	Ext  string
+}
+
+type ConvertSetting struct {
+	VideoFileInput       File
+	VideoFileOut         File
+	OverwriteOutputFiles bool
+}
+
 type ConvertorContract interface {
 	RunConvert(setting ConvertSetting, progress ProgressContract) error
 	GetTotalDuration(file *File) (float64, error)
