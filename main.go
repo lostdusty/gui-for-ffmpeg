@@ -35,6 +35,8 @@ func init() {
 		kernel.PanicErrorLang(err, appMetadata)
 	}
 
+	
+
 	ffPathUtilities = &kernel.FFPathUtilities{FFmpeg: "", FFprobe: ""}
 	convertorService := kernel.NewService(ffPathUtilities)
 	layoutLocalizerListener := kernel.NewLayoutLocalizerListener()
